@@ -1175,22 +1175,50 @@ ${getSenderLine() || ""}`.trimEnd()
 
   // ── Бот чатига юбориш (илова очган фойдаланувчига) ──
   async function sendToBotChat(text) {
-    const user = tg?.initDataUnsafe?.user;
-    if (!user?.id) return; // Фойдаланувчи ID си йўқ бўлса ўтказиб юбор
+    // initDataUnsafe ishonchsiz — avval u yerdan, keyin initData dan olamiz
+    let userId = tg?.initDataUnsafe?.user?.id;
+
+    // Agar initDataUnsafe bo'sh bo'lsa, initData string'dan parse qilamiz
+    if (!userId && tg?.initData) {
+      try {
+        const params = new URLSearchParams(tg.initData);
+        const userStr = params.get('user');
+        if (userStr) {
+          const parsed = JSON.parse(userStr);
+          userId = parsed?.id;
+        }
+      } catch (e) {}
+    }
+
+    if (!userId) {
+      toast('⚠️ Фойдаланувчи ID аниқланмади');
+      return;
+    }
+
     try {
-      await fetch(
+      const res = await fetch(
         `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            chat_id: user.id,
+            chat_id: userId,
             text: text,
             parse_mode: 'HTML'
           })
         }
       );
+      const data = await res.json();
+      if (!data.ok) {
+        // Eng ko'p uchraydigan xato: foydalanuvchi botni bloklagan yoki /start bosmagam
+        const desc = data.description || '';
+        if (desc.includes('bot was blocked') || desc.includes('chat not found') || desc.includes('Forbidden')) {
+          toast('⚠️ Сиз ботни блокладингиз ёки /start босмагансиз');
+        } else {
+          toast('⚠️ Бот чати хато: ' + desc);
+        }
+      }
     } catch (e) {
-      // Хатони яширган ҳолда давом этамиз
+      toast('⚠️ Бот чатига юборишда хато');
     }
   }
 
