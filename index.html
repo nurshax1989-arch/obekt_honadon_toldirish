@@ -731,17 +731,21 @@
   }
 
   // ── Har so'z bosh harfini katta qilish (FISh uchun) ──
+  function capitalizeWords(val) {
+    return val.replace(/(^|\s)(\S)/gu, (m, space, char) => space + char.toUpperCase());
+  }
+
   function applyCapitalizeWords(el) {
-    el.addEventListener('input', function() {
-      const pos = this.selectionStart;
-      const val = this.value;
-      // Har so'zning birinchi harfini katta qil
-      const newVal = val.replace(/(^|\s)(\S)/gu, (m, space, char) => space + char.toUpperCase());
-      if (newVal !== val) {
-        this.value = newVal;
-        try { this.setSelectionRange(pos, pos); } catch(e) {}
+    function fix() {
+      const pos = el.selectionStart;
+      const newVal = capitalizeWords(el.value);
+      if (newVal !== el.value) {
+        el.value = newVal;
+        try { el.setSelectionRange(pos, pos); } catch(e) {}
       }
-    });
+    }
+    el.addEventListener('input', fix);
+    el.addEventListener('blur', fix);
   }
 
   // ── Barcha harflarni katta qilish (tashkilot nomi uchun) ──
