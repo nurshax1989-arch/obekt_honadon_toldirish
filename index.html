@@ -794,9 +794,8 @@
     let result = '';
     let i = 0;
     while (i < text.length) {
-      // Avval 3 belgili (o'g kabi)
       let found = false;
-      // 2 belgili tekshir
+      // 2 belgili tekshir (avval)
       if (i + 1 < text.length) {
         const two = text[i] + text[i+1];
         if (latinToCyril[two] !== undefined) {
@@ -820,19 +819,134 @@
     'homeLat','homeLng','pultNumber','houseNumber','homeHouse','homeApt',
     'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult']);
 
+  // ── Lotin → Kiril: keydown yondashuvi (pending bilan) ──
+  //
+  // "Pending" harflar: s, c, g, n, y, t — ular keyingi harfga qarab
+  // ikki belgili kombinatsiya hosil qilishi mumkin.
+  // Pending harf ekranda ko'rinmaydi, keyingi harf bilan birgalikda qaror qilinadi.
+
+  // Pending bo'lishi mumkin bo'lgan lotin harflar → kutilayotgan ikkinchi harf
+  const pendingCombos = {
+    's': { h:'ш', H:'Ш',  _else:'с' },
+    'S': { h:'Ш', H:'Ш',  _else:'С' },
+    'c': { h:'ч', H:'Ч',  _else:'с' },  // c yolg'iz → с
+    'C': { h:'Ч', H:'Ч',  _else:'С' },
+    'g': { h:'ғ', H:'Ғ',  _else:'г' },
+    'G': { h:'Ғ', H:'Ғ',  _else:'Г' },
+    'n': { g:'нг',G:'НГ', _else:'н' },
+    'N': { g:'НГ',G:'НГ', _else:'Н' },
+    'y': { o:'ё', O:'Ё', a:'я', A:'Я', u:'ю', U:'Ю', _else:'й' },
+    'Y': { o:'Ё', O:'Ё', a:'Я', A:'Я', u:'Ю', U:'Ю', _else:'Й' },
+    't': { s:'ц', S:'Ц',  _else:'т' },
+    'T': { s:'Ц', S:'Ц',  _else:'Т' },
+  };
+
+  // Pending bo'lmagan oddiy bir belgili harflar
+  const simpleSingle = {
+    'a':'а','A':'А','b':'б','B':'Б','d':'д','D':'Д',
+    'e':'е','E':'Е','f':'ф','F':'Ф','h':'ҳ','H':'Ҳ',
+    'i':'и','I':'И','j':'ж','J':'Ж','k':'к','K':'К',
+    'l':'л','L':'Л','m':'м','M':'М','o':'о','O':'О',
+    'p':'п','P':'П','q':'қ','Q':'Қ','r':'р','R':'Р',
+    'u':'у','U':'У','v':'в','V':'В','x':'х','X':'Х',
+    'z':'з','Z':'З',"'":'ъ',"'":'ъ',
+  };
+
   document.querySelectorAll('input[type=text], textarea').forEach(el => {
     if (skipIds.has(el.id)) return;
-    el.addEventListener('input', function() {
-      // Faqat lotin harflar bo'lsa o'gir
-      if (/[a-zA-Z]/.test(this.value)) {
-        const pos = this.selectionStart;
-        const converted = latinToCyrillicText(this.value);
-        if (converted !== this.value) {
-          this.value = converted;
-          // Kursorni saqlab qolish
-          try { this.setSelectionRange(pos, pos); } catch(e) {}
+
+    let pendingChar = null;   // kutilayotgan lotin harf ('s','c','g',...)
+    let pendingPos  = -1;     // pending yozilgan pozitsiya
+
+    function insertAt(el, pos, endPos, text) {
+      const val = el.value;
+      el.value = val.slice(0, pos) + text + val.slice(endPos);
+      const cur = pos + text.length;
+      try { el.setSelectionRange(cur, cur); } catch(e) {}
+    }
+
+    function flushPending(el) {
+      // Pending harfni yozib qo'yish (ikkinchi harf kelmadi)
+      if (pendingChar === null) return;
+      const kiril = pendingCombos[pendingChar]?._else || pendingChar;
+      const pos = el.selectionStart;
+      insertAt(el, pos, pos, kiril);
+      pendingChar = null;
+      pendingPos  = -1;
+    }
+
+    el.addEventListener('keydown', function(e) {
+      if (e.key.length !== 1) {
+        // Backspace, Enter, Arrow va boshqalar — pending ni yoz va o'tkazib yubor
+        if (pendingChar !== null) {
+          e.preventDefault();
+          flushPending(this);
+          // Agar Backspace bo'lsa, flush dan keyin o'chirish kerak
+          if (e.key === 'Backspace') {
+            const pos = this.selectionStart;
+            if (pos > 0) {
+              this.value = this.value.slice(0, pos - 1) + this.value.slice(pos);
+              try { this.setSelectionRange(pos-1, pos-1); } catch(err) {}
+            }
+          }
         }
+        return;
       }
+
+      const key = e.key;
+
+      // Lotin bo'lmasa — pending yozib, oddiy char qo'y
+      if (!/[a-zA-Z'`']/.test(key)) {
+        if (pendingChar !== null) flushPending(this);
+        return; // raqam va belgilar o'z holida yozilsin
+      }
+
+      e.preventDefault();
+      const pos = this.selectionStart;
+      const end = this.selectionEnd;
+
+      // Agar pending harf bor bo'lsa
+      if (pendingChar !== null) {
+        const combo = pendingCombos[pendingChar];
+        if (combo && combo[key] !== undefined) {
+          // Ikki belgili kombinatsiya topildi!
+          insertAt(this, pos, end, combo[key]);
+          pendingChar = null;
+          pendingPos  = -1;
+        } else {
+          // Kombinatsiya yo'q — pending ni yoz, keyin yangi harfni qayta ko'r
+          flushPending(this);
+          // Yangi harf uchun pending yoki oddiy
+          const newPos = this.selectionStart;
+          if (pendingCombos[key]) {
+            pendingChar = key;
+            pendingPos  = newPos;
+          } else {
+            const k = simpleSingle[key];
+            if (k !== undefined) insertAt(this, newPos, newPos, k);
+            else insertAt(this, newPos, newPos, key);
+          }
+        }
+        return;
+      }
+
+      // Pending yo'q — bu harf pending bo'ladimi?
+      if (pendingCombos[key]) {
+        pendingChar = key;
+        pendingPos  = pos;
+        // Ekranda hali hech narsa yozmaymiz — kutamiz
+        return;
+      }
+
+      // Oddiy harf
+      const k = simpleSingle[key];
+      if (k !== undefined) insertAt(this, pos, end, k);
+      else insertAt(this, pos, end, key);
+    });
+
+    // Focus ketsa pending ni yozib qo'y
+    el.addEventListener('blur', function() {
+      if (pendingChar !== null) flushPending(this);
     });
   });
 
@@ -857,7 +971,7 @@
   function showLoader() { document.getElementById('loader').classList.add('show'); }
   function hideLoader() { document.getElementById('loader').classList.remove('show'); }
 
-  // ── Telegram Bot API орқали юбориш ──
+  // ── Telegram Bot API орқали каналга юбориш ──
   async function sendToChannel(text) {
     showLoader();
     try {
@@ -1059,20 +1173,41 @@ ${getSenderLine() || ""}`.trimEnd()
     );
   }
 
+  // ── Бот чатига юбориш (илова очган фойдаланувчига) ──
+  async function sendToBotChat(text) {
+    const user = tg?.initDataUnsafe?.user;
+    if (!user?.id) return; // Фойдаланувчи ID си йўқ бўлса ўтказиб юбор
+    try {
+      await fetch(
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: user.id,
+            text: text,
+            parse_mode: 'HTML'
+          })
+        }
+      );
+    } catch (e) {
+      // Хатони яширган ҳолда давом этамиз
+    }
+  }
+
   // ── Submit ──
   window.submitObject = async function() {
     const text = buildObjectText();
     const ok   = await sendToChannel(text);
-    if (ok && tg && tg.sendData) {
-      try { tg.sendData(text); } catch(e) {}
+    if (ok) {
+      await sendToBotChat(text);
     }
   };
 
   window.submitHome = async function() {
     const text = buildHomeText();
     const ok   = await sendToChannel(text);
-    if (ok && tg && tg.sendData) {
-      try { tg.sendData(text); } catch(e) {}
+    if (ok) {
+      await sendToBotChat(text);
     }
   };
 
