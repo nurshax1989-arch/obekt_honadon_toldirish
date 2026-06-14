@@ -756,8 +756,9 @@
     });
   }
 
-  // FISh inputlarga capitalize ulash
-  ['hozOrganFish', 'homeFish', 'electric', 'pultBoshligi'].forEach(id => {
+  // FISh va boshqa capitalize inputlar
+  ['hozOrganFish', 'homeFish', 'electric', 'pultBoshligi',
+   'orgCategory', 'mfy', 'street', 'homeMfy', 'homeStreet'].forEach(id => {
     const el = document.getElementById(id);
     if (el) applyCapitalizeWords(el);
   });
