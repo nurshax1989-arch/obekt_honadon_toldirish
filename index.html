@@ -860,24 +860,27 @@
     'homeLat','homeLng','pultNumber','houseNumber','homeHouse','homeApt',
     'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult']);
 
-  // ── Lotin → Kiril: input event asosida (mobil va desktop uchun) ──
-  // Har input o'zgarganda butun matnni konvertatsiya qilamiz
+  // ── Lotin → Kiril: belgi-belgi o'qish (mobil uchun ishonchli) ──
   function convertLatinToCyrillic(text) {
-    // Ikki belgili kombinatsiyalarni avval almashtir
-    const twoChar = [
-      ['sh','ш'],['SH','Ш'],['Sh','Ш'],
-      ['ch','ч'],['CH','Ч'],['Ch','Ч'],
-      ['gh','ғ'],['GH','Ғ'],['Gh','Ғ'],
-      ['ng','нг'],['NG','НГ'],['Ng','Нг'],
-      ['yo','ё'],['YO','Ё'],['Yo','Ё'],
-      ['yu','ю'],['YU','Ю'],['Yu','Ю'],
-      ['ya','я'],['YA','Я'],['Ya','Я'],
-      ['ts','ц'],['TS','Ц'],['Ts','Ц'],
-      ["o'","ў"],["O'","Ў"],["o`","ў"],["O`","Ў"],
-      ["g'","ғ"],["G'","Ғ"],["g`","ғ"],["G`","Ғ"],
-    ];
-    // Bir belgili
-    const oneChar = {
+    // Kiril+lotin aralash ikki belgili juftliklar (s→с bo'lgandan keyin +h)
+    const mixedTwo = {
+      'сh':'ш','Сh':'Ш','СH':'Ш',
+      'нg':'нг','Нg':'Нг','НG':'НГ',
+      'ғh':'ғ', // g' + h — kerak emas lekin xavfsiz
+    };
+    // To'liq lotin ikki belgili juftliklar
+    const latinTwo = {
+      'sh':'ш','SH':'Ш','Sh':'Ш',
+      'ch':'ч','CH':'Ч','Ch':'Ч',
+      'gh':'ғ','GH':'Ғ','Gh':'Ғ',
+      'ng':'нг','NG':'НГ','Ng':'Нг',
+      'yo':'ё','YO':'Ё','Yo':'Ё',
+      'yu':'ю','YU':'Ю','Yu':'Ю',
+      'ya':'я','YA':'Я','Ya':'Я',
+      'ts':'ц','TS':'Ц','Ts':'Ц',
+    };
+    // Bir belgili lotin
+    const one = {
       'a':'а','A':'А','b':'б','B':'Б','d':'д','D':'Д',
       'e':'е','E':'Е','f':'ф','F':'Ф','g':'г','G':'Г',
       'h':'ҳ','H':'Ҳ','i':'и','I':'И','j':'ж','J':'Ж',
@@ -888,12 +891,41 @@
       'x':'х','X':'Х','y':'й','Y':'Й','z':'з','Z':'З',
       "'":'ъ',"'":'ъ',
     };
+    // Maxsus: o' va g' belgilari
+    const apostrophe = ["'","'","`"];
 
-    let result = text;
-    twoChar.forEach(([lat, cyr]) => {
-      result = result.split(lat).join(cyr);
-    });
-    result = result.split('').map(ch => oneChar[ch] ?? ch).join('');
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+      // 1) Avval kiril+lotin aralash ikki belgili tekshir (masalan: сh)
+      if (i + 1 < text.length) {
+        const two = text[i] + text[i+1];
+        if (mixedTwo[two]) {
+          result += mixedTwo[two];
+          i += 2;
+          continue;
+        }
+        // 2) o' va g' belgilari (apostrof bilan)
+        if ((text[i] === 'o' || text[i] === 'O') && apostrophe.includes(text[i+1])) {
+          result += text[i] === 'o' ? 'ў' : 'Ў';
+          i += 2; continue;
+        }
+        if ((text[i] === 'g' || text[i] === 'G') && apostrophe.includes(text[i+1])) {
+          result += text[i] === 'g' ? 'ғ' : 'Ғ';
+          i += 2; continue;
+        }
+        // 3) Lotin ikki belgili juftlik
+        if (latinTwo[two]) {
+          result += latinTwo[two];
+          i += 2;
+          continue;
+        }
+      }
+      // 4) Bir belgili lotin
+      const ch = text[i];
+      result += one[ch] ?? ch;
+      i++;
+    }
     return result;
   }
 
