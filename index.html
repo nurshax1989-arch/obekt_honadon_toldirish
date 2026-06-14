@@ -1220,18 +1220,12 @@ ${getSenderLine() || ""}`.trimEnd()
   // ── Submit ──
   window.submitObject = async function() {
     const text = buildObjectText();
-    const ok   = await sendToChannel(text);
-    if (ok) {
-      await sendToBotChat(text);
-    }
+    await sendToChannel(text);
   };
 
   window.submitHome = async function() {
     const text = buildHomeText();
-    const ok   = await sendToChannel(text);
-    if (ok) {
-      await sendToBotChat(text);
-    }
+    await sendToChannel(text);
   };
 
   // ── GPS: Менинг жойим ──
