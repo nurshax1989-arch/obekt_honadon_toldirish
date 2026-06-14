@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="uz-Cyrl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f4c9e">
+  <title>Қўриқлаш хизмати</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --blue:      #1a56db;
+      --blue-dark: #0f3a9e;
+      --blue-soft: #e8f0fe;
+      --green:     #059669;
+      --green-soft:#ecfdf5;
+      --red:       #dc2626;
+      --gray-50:   #f9fafb;
+      --gray-100:  #f3f4f6;
+      --gray-200:  #e5e7eb;
+      --gray-400:  #9ca3af;
+      --gray-600:  #4b5563;
+      --gray-700:  #374151;
+      --gray-900:  #111827;
+      --text:      #1f2937;
+      --radius:    12px;
+      --shadow:    0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--gray-100);
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
+      color: #fff;
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 2px 8px rgba(15,58,158,0.3);
+    }
+    .header-icon { font-size: 1.6rem; }
+    .header-text h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em; }
+    .header-text p  { font-size: 0.72rem; opacity: 0.8; margin-top: 1px; }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid var(--gray-200);
+      position: sticky;
+      top: 60px;
+      z-index: 190;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 13px 8px;
+      border: none;
+      background: transparent;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      touch-action: manipulation;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    /* ── SECTIONS ── */
+    .section { display: none; padding: 16px 12px 32px; flex-direction: column; gap: 12px; }
+    .section.active { display: flex; }
+
+    /* ── CARD ── */
+    .card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── FORM ── */
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      background: var(--gray-50);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+    }
+    .prefix-wrap:focus-within input { background: transparent !important; box-shadow: none !important; }
+    input[readonly] {
+      background: var(--gray-100);
+      color: var(--gray-600);
+      cursor: default;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234b5563' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+      padding-right: 32px;
+    }
+    textarea { resize: none; line-height: 1.5; }
+
+    .row { display: flex; gap: 8px; }
+    .row .form-group { flex: 1; }
+
+    /* prefix */
+    .prefix-wrap {
+      display: flex;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--gray-50);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .prefix-wrap:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+    }
+    .prefix-wrap .pfx {
+      background: var(--gray-100);
+      border-right: 1.5px solid var(--gray-200);
+      padding: 11px 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+    }
+    .prefix-wrap input {
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      flex: 1;
+      min-width: 0;
+      color: var(--text);
+    }
+    .prefix-wrap input:focus { box-shadow: none; background: transparent; }
+
+    .fixed-label {
+      background: var(--blue-soft);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--blue-dark);
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s;
+      touch-action: manipulation;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:active { background: var(--blue-dark); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:active { background: #047857; }
+    .btn-outline {
+      background: #fff;
+      color: var(--blue);
+      border: 2px solid var(--blue);
+    }
+    .btn-outline:active { background: var(--blue-soft); }
+    .btn-sm {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      border-radius: 9px;
+    }
+
+    /* ── LOCATION DISPLAY ── */
+    .loc-display {
+      background: var(--gray-50);
+      border: 1.5px dashed var(--gray-400);
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 0.82rem;
+      color: var(--gray-600);
+      text-align: center;
+      margin-top: 4px;
+      transition: all 0.2s;
+    }
+    .loc-display.set {
+      background: var(--green-soft);
+      border-color: #6ee7b7;
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    /* ── MAP MODAL ── */
+    .map-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .map-modal.open { display: flex; }
+    .map-sheet {
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 600px;
+      height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .map-header {
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--gray-200);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .map-close {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gray-200);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-700);
+      flex-shrink: 0;
+    }
+    #locationMap { flex: 1; width: 100%; cursor: crosshair; position: relative; }
+
+    /* GPS button inside map */
+    .gps-btn {
+      position: absolute;
+      bottom: 80px;
+      right: 10px;
+      z-index: 1000;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-200);
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+    .gps-btn:active { transform: scale(0.92); background: var(--blue-soft); }
+    .gps-btn.loading { animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .map-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      gap: 8px;
+    }
+    .map-footer .btn { flex: 1; padding: 12px; font-size: 0.9rem; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--gray-900);
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── LOADER ── */
+    .loader-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,0.75);
+      z-index: 800;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .loader-overlay.show { display: flex; }
+    .spinner {
+      width: 42px; height: 42px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { font-size: 0.9rem; font-weight: 600; color: var(--gray-700); }
+
+    /* ── DARK MODE ── */
+    @media (prefers-color-scheme: dark) {
+      body { background: #0d1117; color: #e5e7eb; }
+      .card { background: #161b22; }
+      .tabs { background: #161b22; border-bottom-color: #30363d; }
+      .tab-btn.active { background: rgba(26,86,219,0.15); }
+      input, select, textarea { background: #0d1117; border-color: #30363d; color: #e5e7eb; }
+      input:focus, select:focus, textarea:focus { background: #161b22; }
+      .prefix-wrap { background: #0d1117; border-color: #30363d; }
+      .prefix-wrap .pfx { background: #1c2128; border-right-color: #30363d; color: #c9d1d9; }
+      .prefix-wrap input { color: #e5e7eb; }
+      label { color: #c9d1d9; }
+      .fixed-label { background: rgba(26,86,219,0.15); border-color: #1d4ed8; color: #93c5fd; }
+      .loc-display { background: #1c2128; border-color: #30363d; color: #9ca3af; }
+      .loc-display.set { background: rgba(5,150,105,0.15); border-color: #059669; color: #6ee7b7; }
+      .btn-outline { background: transparent; }
+    }
+
+    @supports (padding: env(safe-area-inset-bottom)) {
+      .section { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🛡️</div>
+  <div class="header-text">
+    <h1>Қўриқлаш хизмати</h1>
+    <p>Объект ва Хонадон маълумотларини киритиш</p>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" id="tabObject" onclick="switchTab('object')">🏢 Объект қўшиш</button>
+  <button class="tab-btn"        id="tabHome"   onclick="switchTab('home')">🏠 Хонадон қўшиш</button>
+</div>
+
+<!-- ===================== ОБЪЕКТ ===================== -->
+<div id="objectSection" class="section active">
+
+  <!-- Карта рақами -->
+  <div class="card">
+    <div class="card-title">📋 Асосий маълумот</div>
+    <div class="form-group">
+      <label>📋 Карта рақами</label>
+      <input type="text" id="objCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
+    </div>
+  </div>
+
+  <!-- Ташкилот -->
+  <div class="card">
+    <div class="card-title">🏢 Ташкилот</div>
+    <div class="form-group">
+      <label>Тури</label>
+      <select id="orgType">
+        <option value="МЧЖ">МЧЖ</option>
+        <option value="ЯТТ">ЯТТ</option>
+        <option value="ОК">ОК</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Ташкилот номи</label>
+      <input type="text" id="orgName" placeholder="SOMSA UZB">
+    </div>
+    <div class="form-group">
+      <label>Ташкилот тури</label>
+      <input type="text" id="orgCategory" placeholder="Масалан: магазин">
+    </div>
+    <div class="fixed-label" id="orgPreview">МЧЖ"..."</div>
+  </div>
+
+  <!-- Манзил -->
+  <div class="card">
+    <div class="card-title">📍 Манзил</div>
+    <div class="fixed-label">📍 Шайхонтохур туман</div>
+    <div class="form-group">
+      <label>МФЙ номи</label>
+      <input type="text" id="mfy" placeholder="Масалан: Комолон МФЙ">
+    </div>
+    <div class="form-group">
+      <label>Кўча номи</label>
+      <input type="text" id="street" placeholder="Масалан: Комолон кўча">
+    </div>
+    <div class="form-group">
+      <label>Дом рақами</label>
+      <input type="text" id="houseNumber" placeholder="Масалан: 23" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label>Ориентир (ихтиёрий)</label>
+      <input type="text" id="orientir" placeholder="Масалан: корзинка дўкони орқасида">
+    </div>
+    <div class="form-group">
+      <label>Кўчадаги номи (ихтиёрий)</label>
+      <input type="text" id="landmarkDesc" placeholder="Масалан: озиқ овқат дўкон">
+    </div>
+  </div>
+
+  <!-- ГОМ, Прибор, Электрик, Пулт Бошлиғи -->
+  <div class="card">
+    <div class="card-title">⚙️ Техник маълумотлар</div>
+
+    <div class="form-group">
+      <label>📡 Қайси ГОМ</label>
+      <div class="prefix-wrap">
+        <span class="pfx">ГОМ-</span>
+        <input type="text" id="gomNumber" placeholder="1" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>📟 Прибор СИМ</label>
+      <div class="prefix-wrap">
+        <span class="pfx">+998</span>
+        <input type="text" id="priborSim" placeholder="94-669-95-94" inputmode="tel">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="form-group">
+        <label>⚡ Электрик</label>
+        <input type="text" id="electric" placeholder="Фамилия И.О">
+      </div>
+      <div class="form-group">
+        <label>🎛️ Пулт бошлиғи</label>
+        <input type="text" id="pultBoshligi" placeholder="Фамилия И.О">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>📅 Сана</label>
+      <input type="text" id="objDate" readonly>
+    </div>
+
+    <div class="form-group">
+      <label>🖥️ Қайси ПУЛТ</label>
+      <div class="prefix-wrap">
+        <span class="pfx">Шайхонтохур ПТОР -</span>
+        <input type="text" id="pultNumber" placeholder="4" inputmode="numeric">
+      </div>
+    </div>
+  </div>
+
+  <!-- Ҳоз орган -->
+  <div class="card">
+    <div class="card-title">👤 Ҳозирги орган</div>
+    <div class="form-group">
+      <label>📞 Тел рақам 1</label>
+      <div class="prefix-wrap">
+        <span class="pfx">+998</span>
+        <input type="text" id="hozOrganTel1" placeholder="94-669-95-94" inputmode="tel">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>📞 Тел рақам 2 (ихтиёрий)</label>
+      <div class="prefix-wrap">
+        <span class="pfx">+998</span>
+        <input type="text" id="hozOrganTel2" placeholder="94-669-95-94" inputmode="tel">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>👤 ФИШ</label>
+      <input type="text" id="hozOrganFish" placeholder="Фамилия Исм Шариф">
+    </div>
+  </div>
+
+  <!-- Локация -->
+  <div class="card">
+    <div class="card-title">🗺️ Локация</div>
+    <button class="btn btn-green" onclick="openMap('object')">🗺️ Харитадан танлаш</button>
+    <div class="loc-display" id="objLocDisplay">📍 Локация танланмаган</div>
+    <input type="hidden" id="objLat">
+    <input type="hidden" id="objLng">
+  </div>
+
+  <!-- Жўнатиш -->
+  <button class="btn btn-primary" id="sendObjectBtn" onclick="submitObject()">
+    📤 Телеграмга жўнатиш
+  </button>
+</div>
+
+<!-- ===================== ХОНАДОН ===================== -->
+<div id="homeSection" class="section">
+
+  <div class="card">
+    <div class="card-title">🔢 Асосий маълумот</div>
+    <div class="form-group">
+      <label>🔢 КТС рақами</label>
+      <input type="text" id="ktsNumber" placeholder="КТС рақамини киритинг" inputmode="numeric">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 Ҳозирги орган</div>
+    <div class="form-group">
+      <label>👤 ФИШ</label>
+      <input type="text" id="homeFish" placeholder="Фамилия Исм Шариф">
+    </div>
+    <div class="form-group">
+      <label>📞 Тел рақам</label>
+      <div class="prefix-wrap">
+        <span class="pfx">+998</span>
+        <input type="text" id="homeTel" placeholder="94-669-95-94" inputmode="tel">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📍 Манзил</div>
+    <div class="form-group">
+      <label>МФЙ номи</label>
+      <input type="text" id="homeMfy" placeholder="Масалан: Гулобод МФЙ">
+    </div>
+    <div class="form-group">
+      <label>Кўча номи</label>
+      <input type="text" id="homeStreet" placeholder="Масалан: Гул обод кўчаси">
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>🏠 Уй рақами</label>
+        <input type="text" id="homeHouse" placeholder="48" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>🚪 Хонадон</label>
+        <input type="text" id="homeApt" placeholder="4" inputmode="numeric">
+      </div>
+    </div>
+    <div class="row">
+      <div class="form-group">
+        <label>🏢 Подъезд</label>
+        <input type="text" id="homePodezd" placeholder="1" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>📈 Этаж</label>
+        <input type="text" id="homeEtaj" placeholder="6" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>🏗️ Дом этажи</label>
+        <input type="text" id="homeDomEtaj" placeholder="9" inputmode="numeric">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚙️ Назорат маълумотлари</div>
+    <div class="row">
+      <div class="form-group">
+        <label>📡 Қайси ГОМ</label>
+        <input type="text" id="homeGom" placeholder="4" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>🖥️ Пулт</label>
+        <input type="text" id="homePult" placeholder="3" inputmode="numeric">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗺️ Локация</div>
+    <button class="btn btn-green" onclick="openMap('home')">🗺️ Харитадан танлаш</button>
+    <div class="loc-display" id="homeLocDisplay">📍 Локация танланмаган</div>
+    <input type="hidden" id="homeLat">
+    <input type="hidden" id="homeLng">
+  </div>
+
+  <button class="btn btn-primary" id="sendHomeBtn" onclick="submitHome()">
+    📤 Телеграмга жўнатиш
+  </button>
+</div>
+
+<!-- ── MAP MODAL ── -->
+<div class="map-modal" id="mapModal">
+  <div class="map-sheet">
+    <div class="map-header">
+      <span>🗺️ Локацияни белгиланг</span>
+      <button class="map-close" onclick="closeMap()">✕</button>
+    </div>
+    <div style="position:relative; flex:1; display:flex; flex-direction:column;">
+      <div id="locationMap"></div>
+      <button class="gps-btn" id="gpsBtn" onclick="goToMyLocation()" title="Менинг жойим">📍</button>
+    </div>
+    <div class="map-footer">
+      <button class="btn btn-primary" onclick="confirmLocation()">✅ Тасдиқлаш</button>
+      <button class="btn btn-outline" onclick="closeMap()">❌ Бекор</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOADER ── -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loader-text">Юборилмоқда...</div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+(function () {
+  // ══════════════════════════════════════════
+  //  ⚠️ БУ ЕРГА ЎЗ МАЪЛУМОТЛАРИНГИЗНИ КИРИТИНГ
+  // ══════════════════════════════════════════
+  const BOT_TOKEN  = '1686923042:AAEWgglmsz6p0PVliY2kTYG7Hp_pFVDODHM';   // @BotFather дан олинади
+  const CHANNEL_ID = '-1004304980473';  // Масалан: -1001234567890
+
+  // ──────────────────────────────────────────
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  // ── Сана ──
+  function getDate() {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    return `${dd}.${mm}.${d.getFullYear()}`;
+  }
+  const objDateEl = document.getElementById('objDate');
+  objDateEl.value = getDate();
+  const _dateTimer = setInterval(() => { objDateEl.value = getDate(); }, 60000);
+
+  // ── Ташкилот preview ──
+  function updateOrgPreview() {
+    const type = document.getElementById('orgType').value;
+    const name = document.getElementById('orgName').value.trim();
+    const cat  = document.getElementById('orgCategory').value.trim();
+    document.getElementById('orgPreview').textContent =
+      `${type}"${name || '...'}"${cat}`;
+  }
+  ['orgType','orgName','orgCategory'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateOrgPreview)
+  );
+  updateOrgPreview();
+
+  // ══════════════════════════════════════════
+  // ── Телефон рақамини форматлаш ──
+  // ══════════════════════════════════════════
+  function formatPhone(raw) {
+    // Faqat raqamlarni qoldirish
+    const digits = raw.replace(/\D/g, '');
+    // 998 bilan boshlansa olib tashlash
+    const local = digits.startsWith('998') ? digits.slice(3) : digits;
+    // 9 ta raqam bo'lsa formatlash: XX XXX XX XX
+    if (local.length === 9) {
+      return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7,9)}`;
+    }
+    // 7 ta (eski format) yoki boshqa: bo'shliq qo'shib berish
+    if (local.length >= 7) {
+      return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7)}`.trim();
+    }
+    return local;
+  }
+
+  // Telefon inputlariga formatlash ulash
+  const phoneInputIds = ['hozOrganTel1','hozOrganTel2','priborSim','homeTel'];
+  phoneInputIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('blur', () => {
+      const formatted = formatPhone(el.value);
+      if (formatted) el.value = formatted;
+    });
+    el.addEventListener('input', () => {
+      // Faqat raqam va bo'shliq qolsin
+      el.value = el.value.replace(/[^\d\s\-]/g, '');
+    });
+  });
+
+  // ══════════════════════════════════════════
+  // ── Lotin → Kiril avtomatik o'girish ──
+  // ══════════════════════════════════════════
+  const latinToCyril = {
+    // Ikki belgili (avval tekshiriladi)
+    "sh":"ш","SH":"Ш","Sh":"Ш",
+    "ch":"ч","CH":"Ч","Ch":"Ч",
+    "gh":"ғ","GH":"Ғ","Gh":"Ғ",
+    "ng":"нг","NG":"НГ","Ng":"Нг",
+    "yo":"ё","YO":"Ё","Yo":"Ё",
+    "yu":"ю","YU":"Ю","Yu":"Ю",
+    "ya":"я","YA":"Я","Ya":"Я",
+    "ts":"ц","TS":"Ц","Ts":"Ц",
+    "yo":"ё","YO":"Ё",
+    "o'":"ў","O'":"Ў","o`":"ў","O`":"Ў",
+    "g'":"ғ","G'":"Ғ","g`":"ғ","G`":"Ғ",
+    // Bir belgili
+    "a":"а","A":"А",
+    "b":"б","B":"Б",
+    "d":"д","D":"Д",
+    "e":"е","E":"Е",
+    "f":"ф","F":"Ф",
+    "g":"г","G":"Г",
+    "h":"ҳ","H":"Ҳ",
+    "i":"и","I":"И",
+    "j":"ж","J":"Ж",
+    "k":"к","K":"К",
+    "l":"л","L":"Л",
+    "m":"м","M":"М",
+    "n":"н","N":"Н",
+    "o":"о","O":"О",
+    "p":"п","P":"П",
+    "q":"қ","Q":"Қ",
+    "r":"р","R":"Р",
+    "s":"с","S":"С",
+    "t":"т","T":"Т",
+    "u":"у","U":"У",
+    "v":"в","V":"В",
+    "x":"х","X":"Х",
+    "y":"й","Y":"Й",
+    "z":"з","Z":"З",
+    "'":"ъ","'":"ъ",
+    // Raqamlar o'zgarishsiz
+  };
+
+  function latinToCyrillicText(text) {
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+      // Avval 3 belgili (o'g kabi)
+      let found = false;
+      // 2 belgili tekshir
+      if (i + 1 < text.length) {
+        const two = text[i] + text[i+1];
+        if (latinToCyril[two] !== undefined) {
+          result += latinToCyril[two];
+          i += 2;
+          found = true;
+        }
+      }
+      if (!found) {
+        const one = text[i];
+        result += latinToCyril[one] !== undefined ? latinToCyril[one] : one;
+        i++;
+      }
+    }
+    return result;
+  }
+
+  // Matn inputlariga lotin→kiril ulash (telefon va raqam inputlar bundan mustasno)
+  const skipIds = new Set(['objCardNumber','ktsNumber','gomNumber','priborSim',
+    'hozOrganTel1','hozOrganTel2','homeTel','objDate','objLat','objLng',
+    'homeLat','homeLng','pultNumber','houseNumber','homeHouse','homeApt',
+    'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult']);
+
+  document.querySelectorAll('input[type=text], textarea').forEach(el => {
+    if (skipIds.has(el.id)) return;
+    el.addEventListener('input', function() {
+      // Faqat lotin harflar bo'lsa o'gir
+      if (/[a-zA-Z]/.test(this.value)) {
+        const pos = this.selectionStart;
+        const converted = latinToCyrillicText(this.value);
+        if (converted !== this.value) {
+          this.value = converted;
+          // Kursorni saqlab qolish
+          try { this.setSelectionRange(pos, pos); } catch(e) {}
+        }
+      }
+    });
+  });
+
+
+  // ── Tabs ──
+  window.switchTab = function(tab) {
+    ['object','home'].forEach(t => {
+      document.getElementById(t+'Section').classList.toggle('active', t === tab);
+      document.getElementById('tab'+(t==='object'?'Object':'Home')).classList.toggle('active', t === tab);
+    });
+  };
+
+  // ── Toast ──
+  function toast(msg, dur=2800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  // ── Loader ──
+  function showLoader() { document.getElementById('loader').classList.add('show'); }
+  function hideLoader() { document.getElementById('loader').classList.remove('show'); }
+
+  // ── Telegram Bot API орқали юбориш ──
+  async function sendToChannel(text) {
+    showLoader();
+    try {
+      const res = await fetch(
+        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: CHANNEL_ID,
+            text: text,
+            parse_mode: 'HTML'
+          })
+        }
+      );
+      const data = await res.json();
+      hideLoader();
+      if (data.ok) {
+        toast('✅ Каналга муваффақиятли юборилди!');
+        return true;
+      } else {
+        toast('⚠️ Хато: ' + (data.description || 'Номаълум хато'));
+        return false;
+      }
+    } catch (e) {
+      hideLoader();
+      toast('⚠️ Интернет уланишини текширинг');
+      return false;
+    }
+  }
+
+  // ── MAP ──
+  let mapInst = null, mapMarker = null, mapTarget = null, pendingLatLng = null;
+
+  window.openMap = function(target) {
+    mapTarget = target;
+    pendingLatLng = null;
+    document.getElementById('mapModal').classList.add('open');
+
+    setTimeout(() => {
+      if (!mapInst) {
+        mapInst = L.map('locationMap', { attributionControl: false, zoomControl: true })
+                   .setView([41.3111, 69.2797], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
+         .addTo(mapInst);
+        mapInst.on('click', e => {
+          pendingLatLng = e.latlng;
+          if (mapMarker) mapMarker.setLatLng(e.latlng);
+          else mapMarker = L.marker(e.latlng).addTo(mapInst);
+          mapMarker.bindPopup(`📍 ${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`).openPopup();
+        });
+      }
+      mapInst.invalidateSize();
+
+      // Агар аввал танланган бўлса, маркерни кўрсат
+      const latEl = document.getElementById(target === 'object' ? 'objLat' : 'homeLat');
+      const lngEl = document.getElementById(target === 'object' ? 'objLng' : 'homeLng');
+      if (latEl.value && lngEl.value) {
+        const ll = L.latLng(parseFloat(latEl.value), parseFloat(lngEl.value));
+        pendingLatLng = ll;
+        if (mapMarker) mapMarker.setLatLng(ll);
+        else mapMarker = L.marker(ll).addTo(mapInst);
+        mapInst.setView(ll, 16);
+        mapMarker.bindPopup(`📍 ${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`).openPopup();
+      }
+    }, 250);
+  };
+
+  window.closeMap = function() {
+    document.getElementById('mapModal').classList.remove('open');
+    pendingLatLng = null;
+    if (mapMarker) { mapInst.removeLayer(mapMarker); mapMarker = null; }
+  };
+
+  window.confirmLocation = function() {
+    if (!pendingLatLng) { toast('⚠️ Илтимос, харитага босинг'); return; }
+    const lat = pendingLatLng.lat.toFixed(6);
+    const lng = pendingLatLng.lng.toFixed(6);
+    const coord = `${lat}, ${lng}`;
+
+    if (mapTarget === 'object') {
+      document.getElementById('objLat').value = lat;
+      document.getElementById('objLng').value = lng;
+      const d = document.getElementById('objLocDisplay');
+      d.textContent = `✅ ${coord}`;
+      d.classList.add('set');
+    } else {
+      document.getElementById('homeLat').value = lat;
+      document.getElementById('homeLng').value = lng;
+      const d = document.getElementById('homeLocDisplay');
+      d.textContent = `✅ ${coord}`;
+      d.classList.add('set');
+    }
+    toast('✅ Локация белгиланди');
+    document.getElementById('mapModal').classList.remove('open');
+    pendingLatLng = null;
+    if (mapMarker) { mapInst.removeLayer(mapMarker); mapMarker = null; }
+  };
+
+  // ── Юборувчи маълумоти ──
+  function getSenderLine() {
+    const user = tg?.initDataUnsafe?.user;
+    if (!user) return null;
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+    const username = user.username ? ` (@${user.username})` : "";
+    const id = user.id ? ` [ID: ${user.id}]` : "";
+    return `👤 Юборди: ${fullName}${username}${id}`;
+  }
+
+  // ── Объект матни ──
+  function buildObjectText() {
+    const card    = document.getElementById('objCardNumber').value.trim() || '---';
+    const type    = document.getElementById('orgType').value;
+    const name    = document.getElementById('orgName').value.trim();
+    const cat     = document.getElementById('orgCategory').value.trim();
+    const mfy     = document.getElementById('mfy').value.trim();
+    const street  = document.getElementById('street').value.trim();
+    const house   = document.getElementById('houseNumber').value.trim();
+    const orientir= document.getElementById('orientir').value.trim();
+    const landmark= document.getElementById('landmarkDesc').value.trim();
+    const gom     = document.getElementById('gomNumber').value.trim();
+    const pribor  = document.getElementById('priborSim').value.trim();
+    const elec    = document.getElementById('electric').value.trim();
+    const pultBosh= document.getElementById('pultBoshligi').value.trim();
+    const sana    = document.getElementById('objDate').value;
+    const pultNum = document.getElementById('pultNumber').value.trim();
+    const tel1    = document.getElementById('hozOrganTel1').value.trim();
+    const tel2    = document.getElementById('hozOrganTel2').value.trim();
+    const fish    = document.getElementById('hozOrganFish').value.trim();
+    const lat     = document.getElementById('objLat').value;
+    const lng     = document.getElementById('objLng').value;
+
+    const orgFull = `${type}"${name}"${cat}`;
+
+    let address = `Шайхонтохур туман ${mfy} МФЙ ${street} кўча ${house}`;
+    if (orientir) address += ` (Ориентир ${orientir})`;
+    if (landmark) address += ` ${landmark}`;
+
+    let telLine = tel1 ? `+998 ${formatPhone(tel1)}` : '---';
+    if (tel2) telLine += ` / +998 ${formatPhone(tel2)}`;
+
+    const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
+
+    return (
+`📋 <b>Объект маълумотлари</b>
+
+Карта рақами: ${card}
+Ташкилот: ${orgFull}
+Манзил: ${address}
+ГОМ: ${gom || '---'}
+Прибор СИМ: +998 ${pribor ? formatPhone(pribor) : '---'}
+Электрик: ${elec || '---'}
+Пулт Бошлиғи: ${pultBosh || '---'}
+Сана: ${sana}
+Қайси ПУЛТ: Шайхонтохур ПТОР - ${pultNum || '---'}
+Ҳоз орган тел: ${telLine}
+Ҳоз орган ФИШ: ${fish || '---'}
+Локация: ${loc}
+
+${getSenderLine() || ""}`.trimEnd()
+    );
+  }
+
+  // ── Хонадон матни ──
+  function buildHomeText() {
+    const kts     = document.getElementById('ktsNumber').value.trim() || '---';
+    const fish    = document.getElementById('homeFish').value.trim() || '---';
+    const tel     = document.getElementById('homeTel').value.trim() || '---';
+    const mfy     = document.getElementById('homeMfy').value.trim() || '---';
+    const street  = document.getElementById('homeStreet').value.trim() || '---';
+    const house   = document.getElementById('homeHouse').value.trim() || '---';
+    const apt     = document.getElementById('homeApt').value.trim() || '---';
+    const podezd  = document.getElementById('homePodezd').value.trim() || '---';
+    const etaj    = document.getElementById('homeEtaj').value.trim() || '---';
+    const domEtaj = document.getElementById('homeDomEtaj').value.trim() || '---';
+    const gom     = document.getElementById('homeGom').value.trim() || '---';
+    const pult    = document.getElementById('homePult').value.trim() || '---';
+    const lat     = document.getElementById('homeLat').value;
+    const lng     = document.getElementById('homeLng').value;
+
+    const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
+
+    return (
+`🏠 <b>Хонадон маълумотлари</b>
+
+КТС рақами: ${kts}
+Ҳоз орган ФИШ: ${fish}
+Ҳоз орган Тел: +998 ${formatPhone(tel)}
+Манзил: ${mfy} МФЙ ${street} кўчаси
+Уй рақами: ${house}
+Хонадон рақами: ${apt}
+Подъезд: ${podezd}
+Этаж: ${etaj}
+Дом этажи: ${domEtaj}
+Қайси ГОМ: ${gom}
+Пулт: ${pult}
+Локация: ${loc}
+
+${getSenderLine() || ""}`.trimEnd()
+    );
+  }
+
+  // ── Submit ──
+  window.submitObject = async function() {
+    const text = buildObjectText();
+    const ok   = await sendToChannel(text);
+    if (ok && tg && tg.sendData) {
+      try { tg.sendData(text); } catch(e) {}
+    }
+  };
+
+  window.submitHome = async function() {
+    const text = buildHomeText();
+    const ok   = await sendToChannel(text);
+    if (ok && tg && tg.sendData) {
+      try { tg.sendData(text); } catch(e) {}
+    }
+  };
+
+  // ── GPS: Менинг жойим ──
+  window.goToMyLocation = function() {
+    const btn = document.getElementById('gpsBtn');
+    if (!navigator.geolocation) {
+      toast('⚠️ Геолокация қўллаб-қувватланмайди');
+      return;
+    }
+    btn.classList.add('loading');
+    btn.textContent = '⏳';
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        btn.classList.remove('loading');
+        btn.textContent = '📍';
+        const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
+        pendingLatLng = ll;
+        mapInst.setView(ll, 17);
+        if (mapMarker) mapMarker.setLatLng(ll);
+        else mapMarker = L.marker(ll).addTo(mapInst);
+        mapMarker.bindPopup(`📍 ${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`).openPopup();
+        toast('✅ Жойингиз аниқланди');
+      },
+      err => {
+        btn.classList.remove('loading');
+        btn.textContent = '📍';
+        const msgs = {
+          1: '⚠️ Геолокацияга рухсат беринг',
+          2: '⚠️ Жой аниқлаб бўлмади',
+          3: '⚠️ Вақт тугади, қайта уриниб кўринг'
+        };
+        toast(msgs[err.code] || '⚠️ Хато юз берди');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+
+  document.getElementById('mapModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('mapModal')) closeMap();
+  });
+
+})();
+</script>
+</body>
+</html>
