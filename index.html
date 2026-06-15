@@ -914,16 +914,41 @@
     }
     return r;
   }
+  // Kiril + lotin juftliklari (s→с + h = ш, c→ч + h = ч yo'q, lekin с+h=ш, ч+h yo'q)
+  // Oldingi belgi kiril bo'lib, yangi lotin bilan birga ikki belgili juftlik hosil qilsa
+  const cyrilPlusLatin = {
+    'сh':'ш','Сh':'Ш','сH':'Ш','СH':'Ш',
+    'чh':'ч', // ch already done, this won't trigger
+    'нg':'нг','Нg':'Нг','нG':'нг','НG':'НГ',
+  };
+
   document.querySelectorAll('input[type=text], textarea').forEach(el => {
     if (skipIds.has(el.id)) return;
-    el.addEventListener('input', function() {
+    el.addEventListener('input', function(e) {
       const pos = this.selectionStart;
-      const oldVal = this.value;
-      const newVal = convertLatinToCyrillic(oldVal);
-      if (newVal !== oldVal) {
-        const diff = newVal.length - oldVal.length;
+      let val = this.value;
+
+      // 1-qadam: kiril+lotin juftlikni tekshir (masalan: с+h → ш)
+      // Faqat yangi belgi qo'shilganda (pos > 0)
+      if (pos >= 2) {
+        const prevChar = val[pos - 2];
+        const newChar  = val[pos - 1];
+        const pair = prevChar + newChar;
+        if (cyrilPlusLatin[pair] !== undefined) {
+          val = val.slice(0, pos - 2) + cyrilPlusLatin[pair] + val.slice(pos);
+          this.value = val;
+          const newPos = pos - 2 + cyrilPlusLatin[pair].length;
+          try { this.setSelectionRange(newPos, newPos); } catch(e2) {}
+          return; // bu qadam bajarilib bo'ldi
+        }
+      }
+
+      // 2-qadam: oddiy lotin→kiril konvertatsiya
+      const newVal = convertLatinToCyrillic(val);
+      if (newVal !== val) {
+        const diff = newVal.length - val.length;
         this.value = newVal;
-        try { this.setSelectionRange(pos + diff, pos + diff); } catch(e) {}
+        try { this.setSelectionRange(pos + diff, pos + diff); } catch(e2) {}
       }
     });
   });
