@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#0f4c9e">
+  <meta name="theme-color" content="#ffffff">
   <title>Қўриқлаш хизмати</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -15,7 +15,6 @@
       --blue-soft: #e8f0fe;
       --green:     #059669;
       --green-soft:#ecfdf5;
-      --red:       #dc2626;
       --gray-50:   #f9fafb;
       --gray-100:  #f3f4f6;
       --gray-200:  #e5e7eb;
@@ -36,42 +35,93 @@
       overflow-x: hidden;
     }
 
-    /* ── TABS ── */
-    .tabs {
+    /* ── HOME SCREEN ── */
+    .home-screen {
       display: flex;
-      background: #fff;
-      border-bottom: 2px solid var(--gray-200);
-      position: sticky;
-      top: 0;
-      z-index: 200;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 13px 6px;
-      border: none;
-      background: transparent;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--gray-600);
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      margin-bottom: -2px;
-      transition: all 0.2s;
-      touch-action: manipulation;
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      min-height: 100vh;
+      gap: 16px;
+      padding: 32px 20px;
     }
-    .tab-btn.active {
-      color: var(--blue);
-      border-bottom-color: var(--blue);
-      background: var(--blue-soft);
+    .home-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gray-700);
+      text-align: center;
+      margin-bottom: 8px;
     }
+    .home-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .home-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 22px 12px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.18s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .home-card:active { transform: scale(0.96); border-color: var(--blue); background: var(--blue-soft); }
+    .home-card-icon { font-size: 2.2rem; }
+    .home-card-label { font-size: 0.88rem; font-weight: 700; color: var(--gray-700); text-align: center; line-height: 1.3; }
 
-    /* ── SECTIONS ── */
-    .section { display: none; padding: 16px 12px 32px; flex-direction: column; gap: 12px; }
-    .section.active { display: flex; }
+    /* ── SECTION PANEL ── */
+    .section-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      flex-direction: column;
+      background: var(--gray-100);
+    }
+    .section-panel.open { display: flex; }
+
+    .panel-header {
+      background: #fff;
+      border-bottom: 1.5px solid var(--gray-200);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .panel-back {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: var(--gray-100);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-700);
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+    .panel-back:active { background: var(--gray-200); }
+    .panel-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); }
+
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 12px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
     /* ── CARD ── */
     .card {
@@ -106,7 +156,6 @@
       align-items: center;
       gap: 5px;
     }
-
     input, select, textarea {
       width: 100%;
       padding: 11px 13px;
@@ -126,11 +175,7 @@
       box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
     }
     .prefix-wrap:focus-within input { background: transparent !important; box-shadow: none !important; }
-    input[readonly] {
-      background: var(--gray-100);
-      color: var(--gray-600);
-      cursor: default;
-    }
+    input[readonly] { background: var(--gray-100); color: var(--gray-600); cursor: default; }
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234b5563' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
@@ -139,7 +184,6 @@
       padding-right: 32px;
     }
     textarea { resize: none; line-height: 1.5; }
-
     .row { display: flex; gap: 8px; }
     .row .form-group { flex: 1; }
 
@@ -152,10 +196,7 @@
       background: var(--gray-50);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .prefix-wrap:focus-within {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-    }
+    .prefix-wrap:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
     .prefix-wrap .pfx {
       background: var(--gray-100);
       border-right: 1.5px solid var(--gray-200);
@@ -168,12 +209,8 @@
       align-items: center;
     }
     .prefix-wrap input {
-      border: none;
-      border-radius: 0;
-      background: transparent;
-      flex: 1;
-      min-width: 0;
-      color: var(--text);
+      border: none; border-radius: 0; background: transparent;
+      flex: 1; min-width: 0; color: var(--text);
     }
     .prefix-wrap input:focus { box-shadow: none; background: transparent; }
 
@@ -189,31 +226,20 @@
 
     /* ── BUTTONS ── */
     .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.18s;
-      touch-action: manipulation;
+      display: flex; align-items: center; justify-content: center;
+      gap: 7px; width: 100%; padding: 14px; border: none;
+      border-radius: var(--radius); font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; transition: all 0.18s; touch-action: manipulation;
     }
     .btn:active { transform: scale(0.97); }
     .btn-primary { background: var(--blue); color: #fff; }
     .btn-primary:active { background: var(--blue-dark); }
     .btn-green { background: var(--green); color: #fff; }
     .btn-green:active { background: #047857; }
-    .btn-outline {
-      background: #fff;
-      color: var(--blue);
-      border: 2px solid var(--blue);
-    }
+    .btn-outline { background: #fff; color: var(--blue); border: 2px solid var(--blue); }
     .btn-outline:active { background: var(--blue-soft); }
+    .btn-gray { background: var(--gray-200); color: var(--gray-700); border: none; }
+    .btn-gray:active { background: var(--gray-300); }
 
     /* ── LOCATION DISPLAY ── */
     .loc-display {
@@ -227,19 +253,13 @@
       margin-top: 4px;
       transition: all 0.2s;
     }
-    .loc-display.set {
-      background: var(--green-soft);
-      border-color: #6ee7b7;
-      color: #065f46;
-      font-weight: 600;
-    }
+    .loc-display.set { background: var(--green-soft); border-color: #6ee7b7; color: #065f46; font-weight: 600; }
 
     /* ── MAP MODAL ── */
     .map-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      z-index: 500;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 600;
       display: none;
       align-items: flex-end;
       justify-content: center;
@@ -250,103 +270,103 @@
       border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 600px;
-      height: 88vh;
+      /* 75vh — buttons always visible */
+      height: 75vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
     .map-header {
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 13px 16px;
+      display: flex; justify-content: space-between; align-items: center;
       border-bottom: 1px solid var(--gray-200);
-      font-weight: 700;
-      font-size: 1rem;
-    }
-    .map-close {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: var(--gray-200);
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gray-700);
+      font-weight: 700; font-size: 0.95rem;
       flex-shrink: 0;
     }
-    #locationMap { flex: 1; width: 100%; cursor: crosshair; position: relative; }
+    .map-close {
+      width: 30px; height: 30px; border-radius: 50%; border: none;
+      background: var(--gray-200); font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-700); flex-shrink: 0;
+    }
+    .map-body { flex: 1; position: relative; overflow: hidden; }
+    #locationMap { width: 100%; height: 100%; cursor: crosshair; }
 
     .gps-btn {
-      position: absolute;
-      bottom: 80px;
-      right: 10px;
-      z-index: 1000;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      border: 2px solid var(--gray-200);
-      background: #fff;
+      position: absolute; bottom: 14px; right: 10px; z-index: 1000;
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 2px solid var(--gray-200); background: #fff;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      transition: all 0.2s;
-      touch-action: manipulation;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; transition: all 0.2s; touch-action: manipulation;
     }
     .gps-btn:active { transform: scale(0.92); background: var(--blue-soft); }
     .gps-btn.loading { animation: pulse 1s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
     .map-footer {
       padding: 12px 16px;
       border-top: 1px solid var(--gray-200);
-      display: flex;
-      gap: 8px;
+      display: flex; gap: 8px;
+      flex-shrink: 0;
+      background: #fff;
     }
     .map-footer .btn { flex: 1; padding: 12px; font-size: 0.9rem; }
 
+    /* ── CONFIRM DIALOG ── */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px 20px 18px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .confirm-icon { font-size: 2.4rem; text-align: center; }
+    .confirm-title { font-size: 1rem; font-weight: 700; color: var(--gray-900); text-align: center; }
+    .confirm-msg { font-size: 0.88rem; color: var(--gray-600); text-align: center; line-height: 1.5; }
+    .confirm-btns { display: flex; gap: 10px; }
+    .confirm-btns .btn { padding: 13px; font-size: 0.92rem; }
+
     /* ── TOAST ── */
     .toast {
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
+      position: fixed; bottom: 28px; left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: var(--gray-900);
-      color: #fff;
-      padding: 11px 22px;
-      border-radius: 50px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      z-index: 9999;
-      opacity: 0;
-      pointer-events: none;
+      background: var(--gray-900); color: #fff;
+      padding: 11px 22px; border-radius: 50px;
+      font-size: 0.88rem; font-weight: 600;
+      z-index: 9999; opacity: 0; pointer-events: none;
       transition: opacity 0.25s, transform 0.25s;
-      white-space: nowrap;
-      max-width: 90vw;
-      text-align: center;
+      white-space: nowrap; max-width: 90vw; text-align: center;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── LOADER ── */
     .loader-overlay {
       position: fixed; inset: 0;
-      background: rgba(255,255,255,0.75);
-      z-index: 800;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 12px;
+      background: rgba(255,255,255,0.78);
+      z-index: 800; display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
     }
     .loader-overlay.show { display: flex; }
     .spinner {
       width: 42px; height: 42px;
-      border: 4px solid var(--gray-200);
-      border-top-color: var(--blue);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      border: 4px solid var(--gray-200); border-top-color: var(--blue);
+      border-radius: 50%; animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loader-text { font-size: 0.9rem; font-weight: 600; color: var(--gray-700); }
@@ -354,9 +374,16 @@
     /* ── DARK MODE ── */
     @media (prefers-color-scheme: dark) {
       body { background: #0d1117; color: #e5e7eb; }
+      .home-title { color: #c9d1d9; }
+      .home-card { background: #161b22; }
+      .home-card:active { background: rgba(26,86,219,0.18); }
+      .home-card-label { color: #c9d1d9; }
+      .panel-header { background: #161b22; border-bottom-color: #30363d; }
+      .panel-title { color: #e5e7eb; }
+      .panel-back { background: #30363d; color: #c9d1d9; }
+      .panel-body { background: #0d1117; }
       .card { background: #161b22; }
-      .tabs { background: #161b22; border-bottom-color: #30363d; }
-      .tab-btn.active { background: rgba(26,86,219,0.15); }
+      .card-title { border-bottom-color: #30363d; }
       input, select, textarea { background: #0d1117; border-color: #30363d; color: #e5e7eb; }
       input:focus, select:focus, textarea:focus { background: #161b22; }
       .prefix-wrap { background: #0d1117; border-color: #30363d; }
@@ -367,285 +394,315 @@
       .loc-display { background: #1c2128; border-color: #30363d; color: #9ca3af; }
       .loc-display.set { background: rgba(5,150,105,0.15); border-color: #059669; color: #6ee7b7; }
       .btn-outline { background: transparent; }
+      .btn-gray { background: #30363d; color: #c9d1d9; }
       .map-sheet { background: #161b22; }
-      .map-header { border-bottom-color: #30363d; color: #e5e7eb; }
-      .map-footer { border-top-color: #30363d; }
+      .map-header { border-bottom-color: #30363d; color: #e5e7eb; background: #161b22; }
+      .map-footer { border-top-color: #30363d; background: #161b22; }
       .map-close { background: #30363d; color: #c9d1d9; }
+      .confirm-box { background: #161b22; }
+      .confirm-title { color: #e5e7eb; }
+      .confirm-msg { color: #9ca3af; }
+      .section-panel { background: #0d1117; }
     }
 
     @supports (padding: env(safe-area-inset-bottom)) {
-      .section { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+      .panel-body { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
+      .map-footer { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
     }
   </style>
 </head>
 <body>
 
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab-btn active" id="tabObject" onclick="switchTab('object')">🏢 Объект</button>
-  <button class="tab-btn"        id="tabHome"   onclick="switchTab('home')">🏠 KTS Хонадон</button>
-  <button class="tab-btn"        id="tabLogin"  onclick="switchTab('login')">🔑 Login</button>
+<!-- ===================== HOME SCREEN ===================== -->
+<div class="home-screen" id="homeScreen">
+  <div class="home-title">🛡️ Қўриқлаш хизмати</div>
+  <div class="home-grid">
+    <div class="home-card" onclick="openPanel('object')">
+      <div class="home-card-icon">🏢</div>
+      <div class="home-card-label">Объект</div>
+    </div>
+    <div class="home-card" onclick="openPanel('home')">
+      <div class="home-card-icon">🏠</div>
+      <div class="home-card-label">KTS Хонадон</div>
+    </div>
+    <div class="home-card" onclick="openPanel('login')">
+      <div class="home-card-icon">🔑</div>
+      <div class="home-card-label">Login</div>
+    </div>
+  </div>
 </div>
 
-<!-- ===================== ОБЪЕКТ ===================== -->
-<div id="objectSection" class="section active">
-
-  <div class="card">
-    <div class="card-title">📋 Асосий маълумот</div>
-    <div class="form-group">
-      <label>📋 Карта рақами</label>
-      <input type="text" id="objCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
-    </div>
+<!-- ===================== ОБЪЕКТ PANEL ===================== -->
+<div class="section-panel" id="panelObject">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel()">←</button>
+    <span class="panel-title">🏢 Объект қўшиш</span>
   </div>
+  <div class="panel-body">
 
-  <div class="card">
-    <div class="card-title">🏢 Ташкилот</div>
-    <div class="form-group">
-      <label>Тури</label>
-      <select id="orgType">
-        <option value="МЧЖ">МЧЖ</option>
-        <option value="ЯТТ">ЯТТ</option>
-        <option value="ОК">ОК</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Ташкилот номи</label>
-      <input type="text" id="orgName" placeholder="SOMSA UZB">
-    </div>
-    <div class="form-group">
-      <label>Ташкилот тури</label>
-      <input type="text" id="orgCategory" placeholder="Масалан: магазин">
-    </div>
-    <div class="fixed-label" id="orgPreview">МЧЖ"..."</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">📍 Манзил</div>
-    <div class="fixed-label">📍 Шайхонтохур туман</div>
-    <div class="form-group">
-      <label>МФЙ номи</label>
-      <input type="text" id="mfy" placeholder="Масалан: Комолон МФЙ">
-    </div>
-    <div class="form-group">
-      <label>Кўча номи</label>
-      <input type="text" id="street" placeholder="Масалан: Комолон кўча">
-    </div>
-    <div class="form-group">
-      <label>Дом рақами</label>
-      <input type="text" id="houseNumber" placeholder="Масалан: 23" inputmode="numeric">
-    </div>
-    <div class="form-group">
-      <label>Ориентир (ихтиёрий)</label>
-      <input type="text" id="orientir" placeholder="Масалан: корзинка дўкони орқасида">
-    </div>
-    <div class="form-group">
-      <label>Кўчадаги номи (ихтиёрий)</label>
-      <input type="text" id="landmarkDesc" placeholder="Масалан: озиқ овқат дўкон">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">⚙️ Техник маълумотлар</div>
-    <div class="form-group">
-      <label>📡 Қайси ГОМ</label>
-      <div class="prefix-wrap">
-        <span class="pfx">ГОМ-</span>
-        <input type="text" id="gomNumber" placeholder="1" inputmode="numeric">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>📟 Прибор СИМ</label>
-      <div class="prefix-wrap">
-        <span class="pfx">+998</span>
-        <input type="text" id="priborSim" placeholder="94-669-95-94" inputmode="tel">
-      </div>
-    </div>
-    <div class="row">
+    <div class="card">
+      <div class="card-title">📋 Асосий маълумот</div>
       <div class="form-group">
-        <label>⚡ Электрик</label>
-        <input type="text" id="electric" placeholder="Фамилия И.О">
+        <label>📋 Карта рақами</label>
+        <input type="text" id="objCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🏢 Ташкилот</div>
+      <div class="form-group">
+        <label>Тури</label>
+        <select id="orgType">
+          <option value="МЧЖ">МЧЖ</option>
+          <option value="ЯТТ">ЯТТ</option>
+          <option value="ОК">ОК</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ташкилот номи</label>
+        <input type="text" id="orgName" placeholder="SOMSA UZB">
+      </div>
+      <div class="form-group">
+        <label>Ташкилот тури</label>
+        <input type="text" id="orgCategory" placeholder="Масалан: магазин">
+      </div>
+      <div class="fixed-label" id="orgPreview">МЧЖ"..."</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Манзил</div>
+      <div class="fixed-label">📍 Шайхонтохур туман</div>
+      <div class="form-group">
+        <label>МФЙ номи</label>
+        <input type="text" id="mfy" placeholder="Масалан: Комолон МФЙ">
+      </div>
+      <div class="form-group">
+        <label>Кўча номи</label>
+        <input type="text" id="street" placeholder="Масалан: Комолон кўча">
+      </div>
+      <div class="form-group">
+        <label>Дом рақами</label>
+        <input type="text" id="houseNumber" placeholder="Масалан: 23" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>Ориентир (ихтиёрий)</label>
+        <input type="text" id="orientir" placeholder="Масалан: корзинка дўкони орқасида">
+      </div>
+      <div class="form-group">
+        <label>Кўчадаги номи (ихтиёрий)</label>
+        <input type="text" id="landmarkDesc" placeholder="Масалан: озиқ овқат дўкон">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Техник маълумотлар</div>
+      <div class="form-group">
+        <label>📡 Қайси ГОМ</label>
+        <div class="prefix-wrap">
+          <span class="pfx">ГОМ-</span>
+          <input type="text" id="gomNumber" placeholder="1" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>📟 Прибор СИМ</label>
+        <div class="prefix-wrap">
+          <span class="pfx">+998</span>
+          <input type="text" id="priborSim" placeholder="94-669-95-94" inputmode="tel">
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>⚡ Электрик</label>
+          <input type="text" id="electric" placeholder="Фамилия И.О">
+        </div>
+        <div class="form-group">
+          <label>🎛️ Пулт бошлиғи</label>
+          <input type="text" id="pultBoshligi" placeholder="Фамилия И.О">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>📅 Сана</label>
+        <input type="text" id="objDate" readonly>
+      </div>
+      <div class="form-group">
+        <label>🖥️ Қайси ПУЛТ</label>
+        <div class="prefix-wrap">
+          <span class="pfx">Шайхонтохур ПТОР -</span>
+          <input type="text" id="pultNumber" placeholder="4" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👤 Ҳозирги орган</div>
+      <div class="form-group">
+        <label>📞 Тел рақам 1</label>
+        <div class="prefix-wrap">
+          <span class="pfx">+998</span>
+          <input type="text" id="hozOrganTel1" placeholder="94-669-95-94" inputmode="tel">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>📞 Тел рақам 2 (ихтиёрий)</label>
+        <div class="prefix-wrap">
+          <span class="pfx">+998</span>
+          <input type="text" id="hozOrganTel2" placeholder="94-669-95-94" inputmode="tel">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>👤 ФИШ</label>
+        <input type="text" id="hozOrganFish" placeholder="Фамилия Исм Шариф">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🗺️ Локация</div>
+      <button class="btn btn-green" onclick="openMap('object')">🗺️ Харитадан танлаш</button>
+      <div class="loc-display" id="objLocDisplay">📍 Локация танланмаган</div>
+      <input type="hidden" id="objLat">
+      <input type="hidden" id="objLng">
+    </div>
+
+    <button class="btn btn-primary" onclick="askConfirm('object')">📤 Телеграмга жўнатиш</button>
+  </div>
+</div>
+
+<!-- ===================== KTS ХОНАДОН PANEL ===================== -->
+<div class="section-panel" id="panelHome">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel()">←</button>
+    <span class="panel-title">🏠 KTS Хонадон қўшиш</span>
+  </div>
+  <div class="panel-body">
+
+    <div class="card">
+      <div class="card-title">🔢 Асосий маълумот</div>
+      <div class="form-group">
+        <label>🔢 КТС рақами</label>
+        <input type="text" id="ktsNumber" placeholder="КТС рақамини киритинг" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">👤 Ҳозирги орган</div>
+      <div class="form-group">
+        <label>👤 ФИШ</label>
+        <input type="text" id="homeFish" placeholder="Фамилия Исм Шариф">
+      </div>
+      <div class="form-group">
+        <label>📞 Тел рақам</label>
+        <div class="prefix-wrap">
+          <span class="pfx">+998</span>
+          <input type="text" id="homeTel" placeholder="94-669-95-94" inputmode="tel">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📍 Манзил</div>
+      <div class="form-group">
+        <label>МФЙ номи</label>
+        <input type="text" id="homeMfy" placeholder="Масалан: Гулобод МФЙ">
+      </div>
+      <div class="form-group">
+        <label>Кўча номи</label>
+        <input type="text" id="homeStreet" placeholder="Масалан: Гул обод кўчаси">
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>🏠 Уй рақами</label>
+          <input type="text" id="homeHouse" placeholder="48" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label>🚪 Хонадон</label>
+          <input type="text" id="homeApt" placeholder="4" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>🏢 Подъезд</label>
+          <input type="text" id="homePodezd" placeholder="1" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label>📈 Этаж</label>
+          <input type="text" id="homeEtaj" placeholder="6" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label>🏗️ Дом этажи</label>
+          <input type="text" id="homeDomEtaj" placeholder="9" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚙️ Назорат маълумотлари</div>
+      <div class="row">
+        <div class="form-group">
+          <label>📡 Қайси ГОМ</label>
+          <input type="text" id="homeGom" placeholder="4" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label>🖥️ Пулт</label>
+          <input type="text" id="homePult" placeholder="3" inputmode="numeric">
+        </div>
       </div>
       <div class="form-group">
         <label>🎛️ Пулт бошлиғи</label>
-        <input type="text" id="pultBoshligi" placeholder="Фамилия И.О">
+        <input type="text" id="homePultBoshligi" placeholder="Фамилия И.О">
       </div>
     </div>
-    <div class="form-group">
-      <label>📅 Сана</label>
-      <input type="text" id="objDate" readonly>
-    </div>
-    <div class="form-group">
-      <label>🖥️ Қайси ПУЛТ</label>
-      <div class="prefix-wrap">
-        <span class="pfx">Шайхонтохур ПТОР -</span>
-        <input type="text" id="pultNumber" placeholder="4" inputmode="numeric">
-      </div>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">👤 Ҳозирги орган</div>
-    <div class="form-group">
-      <label>📞 Тел рақам 1</label>
-      <div class="prefix-wrap">
-        <span class="pfx">+998</span>
-        <input type="text" id="hozOrganTel1" placeholder="94-669-95-94" inputmode="tel">
-      </div>
+    <div class="card">
+      <div class="card-title">🗺️ Локация</div>
+      <button class="btn btn-green" onclick="openMap('home')">🗺️ Харитадан танлаш</button>
+      <div class="loc-display" id="homeLocDisplay">📍 Локация танланмаган</div>
+      <input type="hidden" id="homeLat">
+      <input type="hidden" id="homeLng">
     </div>
-    <div class="form-group">
-      <label>📞 Тел рақам 2 (ихтиёрий)</label>
-      <div class="prefix-wrap">
-        <span class="pfx">+998</span>
-        <input type="text" id="hozOrganTel2" placeholder="94-669-95-94" inputmode="tel">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>👤 ФИШ</label>
-      <input type="text" id="hozOrganFish" placeholder="Фамилия Исм Шариф">
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">🗺️ Локация</div>
-    <button class="btn btn-green" onclick="openMap('object')">🗺️ Харитадан танлаш</button>
-    <div class="loc-display" id="objLocDisplay">📍 Локация танланмаган</div>
-    <input type="hidden" id="objLat">
-    <input type="hidden" id="objLng">
+    <button class="btn btn-primary" onclick="askConfirm('home')">📤 Телеграмга жўнатиш</button>
   </div>
-
-  <button class="btn btn-primary" id="sendObjectBtn" onclick="submitObject()">
-    📤 Телеграмга жўнатиш
-  </button>
 </div>
 
-<!-- ===================== KTS ХОНАДОН ===================== -->
-<div id="homeSection" class="section">
-
-  <div class="card">
-    <div class="card-title">🔢 Асосий маълумот</div>
-    <div class="form-group">
-      <label>🔢 КТС рақами</label>
-      <input type="text" id="ktsNumber" placeholder="КТС рақамини киритинг" inputmode="numeric">
-    </div>
+<!-- ===================== LOGIN PANEL ===================== -->
+<div class="section-panel" id="panelLogin">
+  <div class="panel-header">
+    <button class="panel-back" onclick="closePanel()">←</button>
+    <span class="panel-title">🔑 Login</span>
   </div>
+  <div class="panel-body">
 
-  <div class="card">
-    <div class="card-title">👤 Ҳозирги орган</div>
-    <div class="form-group">
-      <label>👤 ФИШ</label>
-      <input type="text" id="homeFish" placeholder="Фамилия Исм Шариф">
-    </div>
-    <div class="form-group">
-      <label>📞 Тел рақам</label>
-      <div class="prefix-wrap">
-        <span class="pfx">+998</span>
-        <input type="text" id="homeTel" placeholder="94-669-95-94" inputmode="tel">
+    <div class="card">
+      <div class="card-title">📋 Асосий маълумот</div>
+      <div class="form-group">
+        <label>📋 Карта рақами</label>
+        <input type="text" id="loginCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
       </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-title">📍 Манзил</div>
-    <div class="form-group">
-      <label>МФЙ номи</label>
-      <input type="text" id="homeMfy" placeholder="Масалан: Гулобод МФЙ">
-    </div>
-    <div class="form-group">
-      <label>Кўча номи</label>
-      <input type="text" id="homeStreet" placeholder="Масалан: Гул обод кўчаси">
-    </div>
-    <div class="row">
+    <div class="card">
+      <div class="card-title">🏢 Ташкилот</div>
       <div class="form-group">
-        <label>🏠 Уй рақами</label>
-        <input type="text" id="homeHouse" placeholder="48" inputmode="numeric">
+        <label>Тури</label>
+        <select id="loginOrgType">
+          <option value="МЧЖ">МЧЖ</option>
+          <option value="ЯТТ">ЯТТ</option>
+          <option value="ОК">ОК</option>
+        </select>
       </div>
       <div class="form-group">
-        <label>🚪 Хонадон</label>
-        <input type="text" id="homeApt" placeholder="4" inputmode="numeric">
-      </div>
-    </div>
-    <div class="row">
-      <div class="form-group">
-        <label>🏢 Подъезд</label>
-        <input type="text" id="homePodezd" placeholder="1" inputmode="numeric">
+        <label>Ташкилот номи</label>
+        <input type="text" id="loginOrgName" placeholder="SOMSA UZB">
       </div>
       <div class="form-group">
-        <label>📈 Этаж</label>
-        <input type="text" id="homeEtaj" placeholder="6" inputmode="numeric">
+        <label>Ташкилот тури</label>
+        <input type="text" id="loginOrgCategory" placeholder="Масалан: магазин">
       </div>
-      <div class="form-group">
-        <label>🏗️ Дом этажи</label>
-        <input type="text" id="homeDomEtaj" placeholder="9" inputmode="numeric">
-      </div>
+      <div class="fixed-label" id="loginOrgPreview">МЧЖ"..."</div>
     </div>
+
+    <button class="btn btn-primary" onclick="askConfirm('login')">📤 Телеграмга жўнатиш</button>
   </div>
-
-  <div class="card">
-    <div class="card-title">⚙️ Назорат маълумотлари</div>
-    <div class="row">
-      <div class="form-group">
-        <label>📡 Қайси ГОМ</label>
-        <input type="text" id="homeGom" placeholder="4" inputmode="numeric">
-      </div>
-      <div class="form-group">
-        <label>🖥️ Пулт</label>
-        <input type="text" id="homePult" placeholder="3" inputmode="numeric">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>🎛️ Пулт бошлиғи</label>
-      <input type="text" id="homePultBoshligi" placeholder="Фамилия И.О">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🗺️ Локация</div>
-    <button class="btn btn-green" onclick="openMap('home')">🗺️ Харитадан танлаш</button>
-    <div class="loc-display" id="homeLocDisplay">📍 Локация танланмаган</div>
-    <input type="hidden" id="homeLat">
-    <input type="hidden" id="homeLng">
-  </div>
-
-  <button class="btn btn-primary" id="sendHomeBtn" onclick="submitHome()">
-    📤 Телеграмга жўнатиш
-  </button>
-</div>
-
-<!-- ===================== LOGIN ===================== -->
-<div id="loginSection" class="section">
-
-  <div class="card">
-    <div class="card-title">📋 Асосий маълумот</div>
-    <div class="form-group">
-      <label>📋 Карта рақами</label>
-      <input type="text" id="loginCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">🏢 Ташкилот</div>
-    <div class="form-group">
-      <label>Тури</label>
-      <select id="loginOrgType">
-        <option value="МЧЖ">МЧЖ</option>
-        <option value="ЯТТ">ЯТТ</option>
-        <option value="ОК">ОК</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Ташкилот номи</label>
-      <input type="text" id="loginOrgName" placeholder="SOMSA UZB">
-    </div>
-    <div class="form-group">
-      <label>Ташкилот тури</label>
-      <input type="text" id="loginOrgCategory" placeholder="Масалан: магазин">
-    </div>
-    <div class="fixed-label" id="loginOrgPreview">МЧЖ"..."</div>
-  </div>
-
-  <button class="btn btn-primary" id="sendLoginBtn" onclick="submitLogin()">
-    📤 Телеграмга жўнатиш
-  </button>
 </div>
 
 <!-- ── MAP MODAL ── -->
@@ -655,13 +712,26 @@
       <span>🗺️ Локацияни белгиланг</span>
       <button class="map-close" onclick="closeMap()">✕</button>
     </div>
-    <div style="position:relative; flex:1; display:flex; flex-direction:column;">
+    <div class="map-body">
       <div id="locationMap"></div>
-      <button class="gps-btn" id="gpsBtn" onclick="goToMyLocation()" title="Менинг жойим">📍</button>
+      <button class="gps-btn" id="gpsBtn" onclick="goToMyLocation()">📍</button>
     </div>
     <div class="map-footer">
       <button class="btn btn-primary" onclick="confirmLocation()">✅ Тасдиқлаш</button>
       <button class="btn btn-outline" onclick="closeMap()">❌ Бекор</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM DIALOG ── -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-icon">📤</div>
+    <div class="confirm-title">Телеграмга жўнатиш</div>
+    <div class="confirm-msg">Маълумотларни телеграм каналга жўнатишни тасдиқлайсизми?</div>
+    <div class="confirm-btns">
+      <button class="btn btn-gray" onclick="closeConfirm()">❌ Йўқ</button>
+      <button class="btn btn-primary" onclick="doConfirmedSend()">✅ Ҳа</button>
     </div>
   </div>
 </div>
@@ -685,16 +755,30 @@
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
 
-  // ── Сана ──
+  // ── Sana ──
   function getDate() {
     const d = new Date();
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    return `${dd}.${mm}.${d.getFullYear()}`;
+    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
   }
   const objDateEl = document.getElementById('objDate');
   objDateEl.value = getDate();
   setInterval(() => { objDateEl.value = getDate(); }, 60000);
+
+  // ── Panel ochish/yopish ──
+  window.openPanel = function(name) {
+    document.getElementById('homeScreen').style.display = 'none';
+    document.getElementById('panelObject').classList.remove('open');
+    document.getElementById('panelHome').classList.remove('open');
+    document.getElementById('panelLogin').classList.remove('open');
+    const map = { object:'panelObject', home:'panelHome', login:'panelLogin' };
+    document.getElementById(map[name]).classList.add('open');
+  };
+  window.closePanel = function() {
+    document.getElementById('panelObject').classList.remove('open');
+    document.getElementById('panelHome').classList.remove('open');
+    document.getElementById('panelLogin').classList.remove('open');
+    document.getElementById('homeScreen').style.display = '';
+  };
 
   // ── Org preview (Объект) ──
   function updateOrgPreview() {
@@ -720,38 +804,30 @@
   );
   updateLoginOrgPreview();
 
-  // ── Телефон форматлаш ──
+  // ── Telefon formatlash ──
   function formatPhone(raw) {
     const digits = raw.replace(/\D/g, '');
     const local = digits.startsWith('998') ? digits.slice(3) : digits;
-    if (local.length === 9) {
-      return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7,9)}`;
-    }
-    if (local.length >= 7) {
-      return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7)}`.trim();
-    }
+    if (local.length === 9) return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7,9)}`;
+    if (local.length >= 7) return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7)}`.trim();
     return local;
   }
 
-  // ── Har so'z bosh harfi katta (Кирил) ──
+  // ── Capitalize words ──
   function capitalizeWords(val) {
-    return val.replace(/(^|\s)(\S)/gu, (m, space, char) => space + char.toUpperCase());
+    return val.replace(/(^|\s)(\S)/gu, (m, sp, ch) => sp + ch.toUpperCase());
   }
   function applyCapitalizeWords(el) {
     function fix() {
       const pos = el.selectionStart;
-      const newVal = capitalizeWords(el.value);
-      if (newVal !== el.value) {
-        el.value = newVal;
-        try { el.setSelectionRange(pos, pos); } catch(e) {}
-      }
+      const nv = capitalizeWords(el.value);
+      if (nv !== el.value) { el.value = nv; try { el.setSelectionRange(pos, pos); } catch(e){} }
     }
     el.addEventListener('input', fix);
     el.addEventListener('blur', fix);
   }
 
-  // ── Tashkilot nomi: DOIM LOTIN HARFLARDA ──
-  // Kiril → Lotin (teskari) konvertatsiya
+  // ── Tashkilot nomi: DOIM LOTIN uppercase ──
   const cyrilToLatin = {
     'а':'a','А':'A','б':'b','Б':'B','в':'v','В':'V','г':'g','Г':'G',
     'д':'d','Д':'D','е':'e','Е':'E','ё':'yo','Ё':'Yo','ж':'j','Ж':'J',
@@ -759,142 +835,85 @@
     'л':'l','Л':'L','м':'m','М':'M','н':'n','Н':'N','о':'o','О':'O',
     'п':'p','П':'P','р':'r','Р':'R','с':'s','С':'S','т':'t','Т':'T',
     'у':'u','У':'U','ф':'f','Ф':'F','х':'x','Х':'X','ц':'ts','Ц':'Ts',
-    'ч':'ch','Ч':'Ch','ш':'sh','Ш':'Sh','щ':'sh','Щ':'Sh','ъ':"'",'Ъ':"'",
-    'ы':'i','Ы':'I','ь':"'",'Ь':"'",'э':'e','Э':'E','ю':'yu','Ю':'Yu',
-    'я':'ya','Я':'Ya','қ':'q','Қ':'Q','ғ':"g'",'Ғ':"G'",'ҳ':'h','Ҳ':'H',
-    'ў':"o'",'Ў':"O'",'нг':'ng','НГ':'NG',
+    'ч':'ch','Ч':'Ch','ш':'sh','Ш':'Sh','щ':'sh','Щ':'Sh',
+    'ъ':"'",'Ъ':"'",'ы':'i','Ы':'I','ь':"'",'Ь':"'",'э':'e','Э':'E',
+    'ю':'yu','Ю':'Yu','я':'ya','Я':'Ya',
+    'қ':'q','Қ':'Q','ғ':"g'",'Ғ':"G'",'ҳ':'h','Ҳ':'H','ў':"o'",'Ў':"O'",
   };
-
   function cyrilToLatinText(text) {
-    let result = '';
-    let i = 0;
+    let r = '', i = 0;
     while (i < text.length) {
-      // 2 belgili Kiril (нг, НГ)
-      if (i + 1 < text.length) {
-        const two = text[i] + text[i+1];
-        if (cyrilToLatin[two] !== undefined) {
-          result += cyrilToLatin[two];
-          i += 2;
-          continue;
-        }
-      }
       const ch = text[i];
-      result += cyrilToLatin[ch] !== undefined ? cyrilToLatin[ch] : ch;
+      r += cyrilToLatin[ch] !== undefined ? cyrilToLatin[ch] : ch;
       i++;
     }
-    return result;
+    return r;
   }
-
   function applyOrgNameLatinOnly(el) {
     el.addEventListener('input', function() {
       const pos = this.selectionStart;
-      // Avval Kiril → Lotin
-      let val = cyrilToLatinText(this.value);
-      // Keyin uppercase
-      val = val.toUpperCase();
-      if (val !== this.value) {
-        this.value = val;
-        const diff = val.length - this.value.length;
-        try { this.setSelectionRange(pos, pos); } catch(e) {}
-      }
+      let val = cyrilToLatinText(this.value).toUpperCase();
+      if (val !== this.value) { this.value = val; try { this.setSelectionRange(pos, pos); } catch(e){} }
     });
     el.addEventListener('blur', function() {
-      let val = cyrilToLatinText(this.value).toUpperCase();
-      if (val !== this.value) this.value = val;
+      this.value = cyrilToLatinText(this.value).toUpperCase();
     });
   }
 
-  // Obyekt tashkilot nomi
-  const orgNameEl = document.getElementById('orgName');
-  if (orgNameEl) applyOrgNameLatinOnly(orgNameEl);
+  applyOrgNameLatinOnly(document.getElementById('orgName'));
+  applyOrgNameLatinOnly(document.getElementById('loginOrgName'));
 
-  // Login tashkilot nomi
-  const loginOrgNameEl = document.getElementById('loginOrgName');
-  if (loginOrgNameEl) applyOrgNameLatinOnly(loginOrgNameEl);
-
-  // FISh inputlarga capitalize
   ['hozOrganFish','homeFish','electric','pultBoshligi','homePultBoshligi',
    'orgCategory','mfy','street','homeMfy','homeStreet','loginOrgCategory'].forEach(id => {
     const el = document.getElementById(id);
     if (el) applyCapitalizeWords(el);
   });
 
-  // Telefon inputlar
-  const phoneInputIds = ['hozOrganTel1','hozOrganTel2','priborSim','homeTel'];
-  phoneInputIds.forEach(id => {
+  ['hozOrganTel1','hozOrganTel2','priborSim','homeTel'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('blur', () => {
-      const formatted = formatPhone(el.value);
-      if (formatted) el.value = formatted;
-    });
-    el.addEventListener('input', () => {
-      el.value = el.value.replace(/[^\d\s\-]/g, '');
-    });
+    el.addEventListener('blur', () => { const f = formatPhone(el.value); if (f) el.value = f; });
+    el.addEventListener('input', () => { el.value = el.value.replace(/[^\d\s\-]/g, ''); });
   });
 
-  // ══════════════════════════════════════════
-  // ── Lotin → Kiril (barcha matn inputlar uchun) ──
-  // ══════════════════════════════════════════
+  // ── Lotin → Kiril ──
   const skipIds = new Set([
-    'objCardNumber','ktsNumber','loginCardNumber',
-    'gomNumber','priborSim',
-    'hozOrganTel1','hozOrganTel2','homeTel','objDate',
-    'objLat','objLng','homeLat','homeLng',
-    'pultNumber','houseNumber','homeHouse','homeApt',
+    'objCardNumber','ktsNumber','loginCardNumber','gomNumber','priborSim',
+    'hozOrganTel1','hozOrganTel2','homeTel','objDate','objLat','objLng',
+    'homeLat','homeLng','pultNumber','houseNumber','homeHouse','homeApt',
     'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult',
-    // Tashkilot nomlari (ular lotin bo'lishi kerak)
     'orgName','loginOrgName'
   ]);
-
   function convertLatinToCyrillic(text) {
-    const mixedTwo = {
-      'сh':'ш','Сh':'Ш','СH':'Ш',
-      'нg':'нг','Нg':'Нг','НG':'НГ',
-    };
     const latinTwo = {
-      'sh':'ш','SH':'Ш','Sh':'Ш',
-      'ch':'ч','CH':'Ч','Ch':'Ч',
-      'gh':'ғ','GH':'Ғ','Gh':'Ғ',
-      'ng':'нг','NG':'НГ','Ng':'Нг',
-      'yo':'ё','YO':'Ё','Yo':'Ё',
-      'yu':'ю','YU':'Ю','Yu':'Ю',
-      'ya':'я','YA':'Я','Ya':'Я',
-      'ts':'ц','TS':'Ц','Ts':'Ц',
+      'sh':'ш','SH':'Ш','Sh':'Ш','ch':'ч','CH':'Ч','Ch':'Ч',
+      'gh':'ғ','GH':'Ғ','Gh':'Ғ','ng':'нг','NG':'НГ','Ng':'Нг',
+      'yo':'ё','YO':'Ё','Yo':'Ё','yu':'ю','YU':'Ю','Yu':'Ю',
+      'ya':'я','YA':'Я','Ya':'Я','ts':'ц','TS':'Ц','Ts':'Ц',
     };
     const one = {
-      'a':'а','A':'А','b':'б','B':'Б','d':'д','D':'Д',
-      'e':'е','E':'Е','f':'ф','F':'Ф','g':'г','G':'Г',
-      'h':'ҳ','H':'Ҳ','i':'и','I':'И','j':'ж','J':'Ж',
-      'k':'к','K':'К','l':'л','L':'Л','m':'м','M':'М',
-      'n':'н','N':'Н','o':'о','O':'О','p':'п','P':'П',
-      'q':'қ','Q':'Қ','r':'р','R':'Р','s':'с','S':'С',
-      't':'т','T':'Т','u':'у','U':'У','v':'в','V':'В',
-      'x':'х','X':'Х','y':'й','Y':'Й','z':'з','Z':'З',
+      'a':'а','A':'А','b':'б','B':'Б','d':'д','D':'Д','e':'е','E':'Е',
+      'f':'ф','F':'Ф','g':'г','G':'Г','h':'ҳ','H':'Ҳ','i':'и','I':'И',
+      'j':'ж','J':'Ж','k':'к','K':'К','l':'л','L':'Л','m':'м','M':'М',
+      'n':'н','N':'Н','o':'о','O':'О','p':'п','P':'П','q':'қ','Q':'Қ',
+      'r':'р','R':'Р','s':'с','S':'С','t':'т','T':'Т','u':'у','U':'У',
+      'v':'в','V':'В','x':'х','X':'Х','y':'й','Y':'Й','z':'з','Z':'З',
       "'":'ъ',"'":'ъ',
     };
-    const apostrophe = ["'","'","`"];
-    let result = '';
-    let i = 0;
+    const apost = ["'","'","`"];
+    let r = '', i = 0;
     while (i < text.length) {
       if (i + 1 < text.length) {
         const two = text[i] + text[i+1];
-        if (mixedTwo[two]) { result += mixedTwo[two]; i += 2; continue; }
-        if ((text[i]==='o'||text[i]==='O') && apostrophe.includes(text[i+1])) {
-          result += text[i]==='o' ? 'ў' : 'Ў'; i += 2; continue;
-        }
-        if ((text[i]==='g'||text[i]==='G') && apostrophe.includes(text[i+1])) {
-          result += text[i]==='g' ? 'ғ' : 'Ғ'; i += 2; continue;
-        }
-        if (latinTwo[two]) { result += latinTwo[two]; i += 2; continue; }
+        if ((text[i]==='o'||text[i]==='O') && apost.includes(text[i+1])) { r += text[i]==='o'?'ў':'Ў'; i+=2; continue; }
+        if ((text[i]==='g'||text[i]==='G') && apost.includes(text[i+1])) { r += text[i]==='g'?'ғ':'Ғ'; i+=2; continue; }
+        if (latinTwo[two]) { r += latinTwo[two]; i+=2; continue; }
       }
-      const ch = text[i];
-      result += one[ch] ?? ch;
+      r += one[text[i]] ?? text[i];
       i++;
     }
-    return result;
+    return r;
   }
-
   document.querySelectorAll('input[type=text], textarea').forEach(el => {
     if (skipIds.has(el.id)) return;
     el.addEventListener('input', function() {
@@ -909,21 +928,10 @@
     });
   });
 
-  // ── Tabs ──
-  window.switchTab = function(tab) {
-    ['object','home','login'].forEach(t => {
-      document.getElementById(t+'Section').classList.toggle('active', t === tab);
-    });
-    document.getElementById('tabObject').classList.toggle('active', tab === 'object');
-    document.getElementById('tabHome').classList.toggle('active', tab === 'home');
-    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
-  };
-
   // ── Toast ──
   function toast(msg, dur=2800) {
     const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), dur);
   }
 
@@ -931,31 +939,42 @@
   function showLoader() { document.getElementById('loader').classList.add('show'); }
   function hideLoader() { document.getElementById('loader').classList.remove('show'); }
 
-  // ── Kaналга юбориш ──
+  // ── Confirm dialog ──
+  let pendingSendType = null;
+  window.askConfirm = function(type) {
+    pendingSendType = type;
+    document.getElementById('confirmOverlay').classList.add('open');
+  };
+  window.closeConfirm = function() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+    pendingSendType = null;
+  };
+  window.doConfirmedSend = async function() {
+    document.getElementById('confirmOverlay').classList.remove('open');
+    if (pendingSendType === 'object') await sendToChannel(buildObjectText());
+    else if (pendingSendType === 'home') await sendToChannel(buildHomeText());
+    else if (pendingSendType === 'login') await sendToChannel(buildLoginText());
+    pendingSendType = null;
+  };
+  // Overlay tashqarisiga bosish
+  document.getElementById('confirmOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
+  });
+
+  // ── Kaналга yuborish ──
   async function sendToChannel(text) {
     showLoader();
     try {
-      const res = await fetch(
-        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: CHANNEL_ID, text: text, parse_mode: 'HTML' })
-        }
-      );
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHANNEL_ID, text, parse_mode: 'HTML' })
+      });
       const data = await res.json();
       hideLoader();
-      if (data.ok) {
-        toast('✅ Каналга муваффақиятли юборилди!');
-        return true;
-      } else {
-        toast('⚠️ Хато: ' + (data.description || 'Номаълум хато'));
-        return false;
-      }
-    } catch (e) {
-      hideLoader();
-      toast('⚠️ Интернет уланишини текширинг');
-      return false;
-    }
+      if (data.ok) { toast('✅ Каналга муваффақиятли юборилди!'); return true; }
+      else { toast('⚠️ Хато: ' + (data.description || 'Номаълум хато')); return false; }
+    } catch(e) { hideLoader(); toast('⚠️ Интернет уланишини текширинг'); return false; }
   }
 
   // ── MAP ──
@@ -980,7 +999,7 @@
       mapInst.invalidateSize();
       const latEl = document.getElementById(target === 'object' ? 'objLat' : 'homeLat');
       const lngEl = document.getElementById(target === 'object' ? 'objLng' : 'homeLng');
-      if (latEl.value && lngEl.value) {
+      if (latEl && latEl.value && lngEl && lngEl.value) {
         const ll = L.latLng(parseFloat(latEl.value), parseFloat(lngEl.value));
         pendingLatLng = ll;
         if (mapMarker) mapMarker.setLatLng(ll);
@@ -990,28 +1009,25 @@
       }
     }, 250);
   };
-
   window.closeMap = function() {
     document.getElementById('mapModal').classList.remove('open');
     pendingLatLng = null;
     if (mapMarker) { mapInst.removeLayer(mapMarker); mapMarker = null; }
   };
-
   window.confirmLocation = function() {
     if (!pendingLatLng) { toast('⚠️ Илтимос, харитага босинг'); return; }
     const lat = pendingLatLng.lat.toFixed(6);
     const lng = pendingLatLng.lng.toFixed(6);
-    const coord = `${lat}, ${lng}`;
     if (mapTarget === 'object') {
       document.getElementById('objLat').value = lat;
       document.getElementById('objLng').value = lng;
       const d = document.getElementById('objLocDisplay');
-      d.textContent = `✅ ${coord}`; d.classList.add('set');
+      d.textContent = `✅ ${lat}, ${lng}`; d.classList.add('set');
     } else {
       document.getElementById('homeLat').value = lat;
       document.getElementById('homeLng').value = lng;
       const d = document.getElementById('homeLocDisplay');
-      d.textContent = `✅ ${coord}`; d.classList.add('set');
+      d.textContent = `✅ ${lat}, ${lng}`; d.classList.add('set');
     }
     toast('✅ Локация белгиланди');
     document.getElementById('mapModal').classList.remove('open');
@@ -1019,7 +1035,32 @@
     if (mapMarker) { mapInst.removeLayer(mapMarker); mapMarker = null; }
   };
 
-  // ── Юборувчи ──
+  // ── GPS ──
+  window.goToMyLocation = function() {
+    const btn = document.getElementById('gpsBtn');
+    if (!navigator.geolocation) { toast('⚠️ Геолокация қўллаб-қувватланмайди'); return; }
+    btn.classList.add('loading'); btn.textContent = '⏳';
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        btn.classList.remove('loading'); btn.textContent = '📍';
+        const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
+        pendingLatLng = ll;
+        mapInst.setView(ll, 17);
+        if (mapMarker) mapMarker.setLatLng(ll);
+        else mapMarker = L.marker(ll).addTo(mapInst);
+        mapMarker.bindPopup(`📍 ${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`).openPopup();
+        toast('✅ Жойингиз аниқланди');
+      },
+      err => {
+        btn.classList.remove('loading'); btn.textContent = '📍';
+        const msgs = {1:'⚠️ Геолокацияга рухсат беринг',2:'⚠️ Жой аниқлаб бўлмади',3:'⚠️ Вақт тугади'};
+        toast(msgs[err.code] || '⚠️ Хато юз берди');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  // ── Yuboruvchi ──
   function getSenderLine() {
     const user = tg?.initDataUnsafe?.user;
     if (!user) return null;
@@ -1029,7 +1070,7 @@
     return `👤 Юборди: ${fullName}${username}${id}`;
   }
 
-  // ── Объект матни ──
+  // ── Matnlar ──
   function buildObjectText() {
     const card    = document.getElementById('objCardNumber').value.trim() || '---';
     const type    = document.getElementById('orgType').value;
@@ -1057,9 +1098,7 @@
     if (landmark) address += ` ${landmark}`;
     let telLine = tel1 ? `+998 ${formatPhone(tel1)}` : '---';
     if (tel2) telLine += ` / +998 ${formatPhone(tel2)}`;
-    const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
-    return (
-`📋 <b>Объект маълумотлари</b>
+    return `📋 <b>Объект маълумотлари</b>
 
 Карта рақами: ${card}
 Ташкилот: ${orgFull}
@@ -1072,13 +1111,11 @@
 Қайси ПУЛТ: Шайхонтохур ПТОР - ${pultNum || '---'}
 Ҳоз орган тел: ${telLine}
 Ҳоз орган ФИШ: ${fish || '---'}
-Локация: ${loc}
+Локация: ${(lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган'}
 
-${getSenderLine() || ""}`.trimEnd()
-    );
+${getSenderLine() || ''}`.trimEnd();
   }
 
-  // ── Хонадон матни ──
   function buildHomeText() {
     const kts      = document.getElementById('ktsNumber').value.trim() || '---';
     const fish     = document.getElementById('homeFish').value.trim() || '---';
@@ -1095,9 +1132,7 @@ ${getSenderLine() || ""}`.trimEnd()
     const pultBosh = document.getElementById('homePultBoshligi').value.trim() || '---';
     const lat      = document.getElementById('homeLat').value;
     const lng      = document.getElementById('homeLng').value;
-    const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
-    return (
-`🏠 <b>Хонадон маълумотлари</b>
+    return `🏠 <b>Хонадон маълумотлари</b>
 
 КТС рақами: ${kts}
 Ҳоз орган ФИШ: ${fish}
@@ -1111,61 +1146,23 @@ ${getSenderLine() || ""}`.trimEnd()
 Қайси ГОМ: ${gom}
 Пулт: ${pult}
 Пулт Бошлиғи: ${pultBosh}
-Локация: ${loc}
+Локация: ${(lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган'}
 
-${getSenderLine() || ""}`.trimEnd()
-    );
+${getSenderLine() || ''}`.trimEnd();
   }
 
-  // ── Login матни ──
   function buildLoginText() {
     const card = document.getElementById('loginCardNumber').value.trim() || '---';
     const type = document.getElementById('loginOrgType').value;
     const name = document.getElementById('loginOrgName').value.trim();
     const cat  = document.getElementById('loginOrgCategory').value.trim();
-    const orgFull = `${type}"${name}"${cat}`;
-    return (
-`🔑 <b>Login маълумотлари</b>
+    return `🔑 <b>Login маълумотлари</b>
 
 Карта рақами: ${card}
-Ташкилот: ${orgFull}
+Ташкилот: ${type}"${name}"${cat}
 
-${getSenderLine() || ""}`.trimEnd()
-    );
+${getSenderLine() || ''}`.trimEnd();
   }
-
-  window.submitObject = async function() { await sendToChannel(buildObjectText()); };
-  window.submitHome   = async function() { await sendToChannel(buildHomeText()); };
-  window.submitLogin  = async function() { await sendToChannel(buildLoginText()); };
-
-  // ── GPS ──
-  window.goToMyLocation = function() {
-    const btn = document.getElementById('gpsBtn');
-    if (!navigator.geolocation) { toast('⚠️ Геолокация қўллаб-қувватланмайди'); return; }
-    btn.classList.add('loading'); btn.textContent = '⏳';
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        btn.classList.remove('loading'); btn.textContent = '📍';
-        const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
-        pendingLatLng = ll;
-        mapInst.setView(ll, 17);
-        if (mapMarker) mapMarker.setLatLng(ll);
-        else mapMarker = L.marker(ll).addTo(mapInst);
-        mapMarker.bindPopup(`📍 ${ll.lat.toFixed(6)}, ${ll.lng.toFixed(6)}`).openPopup();
-        toast('✅ Жойингиз аниқланди');
-      },
-      err => {
-        btn.classList.remove('loading'); btn.textContent = '📍';
-        const msgs = { 1:'⚠️ Геолокацияга рухсат беринг', 2:'⚠️ Жой аниқлаб бўлмади', 3:'⚠️ Вақт тугади' };
-        toast(msgs[err.code] || '⚠️ Хато юз берди');
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
-  };
-
-  document.getElementById('mapModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('mapModal')) closeMap();
-  });
 
 })();
 </script>
