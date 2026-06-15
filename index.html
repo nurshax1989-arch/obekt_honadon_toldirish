@@ -36,38 +36,21 @@
       overflow-x: hidden;
     }
 
-    /* ── HEADER ── */
-    .header {
-      background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 100%);
-      color: #fff;
-      padding: 14px 16px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      box-shadow: 0 2px 8px rgba(15,58,158,0.3);
-    }
-    .header-icon { font-size: 1.6rem; }
-    .header-text h1 { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.01em; }
-    .header-text p  { font-size: 0.72rem; opacity: 0.8; margin-top: 1px; }
-
     /* ── TABS ── */
     .tabs {
       display: flex;
       background: #fff;
       border-bottom: 2px solid var(--gray-200);
       position: sticky;
-      top: 60px;
-      z-index: 190;
+      top: 0;
+      z-index: 200;
     }
     .tab-btn {
       flex: 1;
-      padding: 13px 8px;
+      padding: 13px 6px;
       border: none;
       background: transparent;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--gray-600);
       cursor: pointer;
@@ -78,7 +61,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
     }
     .tab-btn.active {
       color: var(--blue);
@@ -231,11 +214,6 @@
       border: 2px solid var(--blue);
     }
     .btn-outline:active { background: var(--blue-soft); }
-    .btn-sm {
-      padding: 10px 14px;
-      font-size: 0.85rem;
-      border-radius: 9px;
-    }
 
     /* ── LOCATION DISPLAY ── */
     .loc-display {
@@ -299,7 +277,6 @@
     }
     #locationMap { flex: 1; width: 100%; cursor: crosshair; position: relative; }
 
-    /* GPS button inside map */
     .gps-btn {
       position: absolute;
       bottom: 80px;
@@ -390,6 +367,10 @@
       .loc-display { background: #1c2128; border-color: #30363d; color: #9ca3af; }
       .loc-display.set { background: rgba(5,150,105,0.15); border-color: #059669; color: #6ee7b7; }
       .btn-outline { background: transparent; }
+      .map-sheet { background: #161b22; }
+      .map-header { border-bottom-color: #30363d; color: #e5e7eb; }
+      .map-footer { border-top-color: #30363d; }
+      .map-close { background: #30363d; color: #c9d1d9; }
     }
 
     @supports (padding: env(safe-area-inset-bottom)) {
@@ -399,25 +380,16 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <div class="header-icon">🛡️</div>
-  <div class="header-text">
-    <h1>Қўриқлаш хизмати</h1>
-    <p>Объект ва Хонадон маълумотларини киритиш</p>
-  </div>
-</div>
-
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab-btn active" id="tabObject" onclick="switchTab('object')">🏢 Объект қўшиш</button>
-  <button class="tab-btn"        id="tabHome"   onclick="switchTab('home')">🏠 Хонадон қўшиш</button>
+  <button class="tab-btn active" id="tabObject" onclick="switchTab('object')">🏢 Объект</button>
+  <button class="tab-btn"        id="tabHome"   onclick="switchTab('home')">🏠 KTS Хонадон</button>
+  <button class="tab-btn"        id="tabLogin"  onclick="switchTab('login')">🔑 Login</button>
 </div>
 
 <!-- ===================== ОБЪЕКТ ===================== -->
 <div id="objectSection" class="section active">
 
-  <!-- Карта рақами -->
   <div class="card">
     <div class="card-title">📋 Асосий маълумот</div>
     <div class="form-group">
@@ -426,7 +398,6 @@
     </div>
   </div>
 
-  <!-- Ташкилот -->
   <div class="card">
     <div class="card-title">🏢 Ташкилот</div>
     <div class="form-group">
@@ -448,7 +419,6 @@
     <div class="fixed-label" id="orgPreview">МЧЖ"..."</div>
   </div>
 
-  <!-- Манзил -->
   <div class="card">
     <div class="card-title">📍 Манзил</div>
     <div class="fixed-label">📍 Шайхонтохур туман</div>
@@ -474,10 +444,8 @@
     </div>
   </div>
 
-  <!-- ГОМ, Прибор, Электрик, Пулт Бошлиғи -->
   <div class="card">
     <div class="card-title">⚙️ Техник маълумотлар</div>
-
     <div class="form-group">
       <label>📡 Қайси ГОМ</label>
       <div class="prefix-wrap">
@@ -485,7 +453,6 @@
         <input type="text" id="gomNumber" placeholder="1" inputmode="numeric">
       </div>
     </div>
-
     <div class="form-group">
       <label>📟 Прибор СИМ</label>
       <div class="prefix-wrap">
@@ -493,7 +460,6 @@
         <input type="text" id="priborSim" placeholder="94-669-95-94" inputmode="tel">
       </div>
     </div>
-
     <div class="row">
       <div class="form-group">
         <label>⚡ Электрик</label>
@@ -504,12 +470,10 @@
         <input type="text" id="pultBoshligi" placeholder="Фамилия И.О">
       </div>
     </div>
-
     <div class="form-group">
       <label>📅 Сана</label>
       <input type="text" id="objDate" readonly>
     </div>
-
     <div class="form-group">
       <label>🖥️ Қайси ПУЛТ</label>
       <div class="prefix-wrap">
@@ -519,7 +483,6 @@
     </div>
   </div>
 
-  <!-- Ҳоз орган -->
   <div class="card">
     <div class="card-title">👤 Ҳозирги орган</div>
     <div class="form-group">
@@ -542,7 +505,6 @@
     </div>
   </div>
 
-  <!-- Локация -->
   <div class="card">
     <div class="card-title">🗺️ Локация</div>
     <button class="btn btn-green" onclick="openMap('object')">🗺️ Харитадан танлаш</button>
@@ -551,13 +513,12 @@
     <input type="hidden" id="objLng">
   </div>
 
-  <!-- Жўнатиш -->
   <button class="btn btn-primary" id="sendObjectBtn" onclick="submitObject()">
     📤 Телеграмга жўнатиш
   </button>
 </div>
 
-<!-- ===================== ХОНАДОН ===================== -->
+<!-- ===================== KTS ХОНАДОН ===================== -->
 <div id="homeSection" class="section">
 
   <div class="card">
@@ -631,6 +592,10 @@
         <input type="text" id="homePult" placeholder="3" inputmode="numeric">
       </div>
     </div>
+    <div class="form-group">
+      <label>🎛️ Пулт бошлиғи</label>
+      <input type="text" id="homePultBoshligi" placeholder="Фамилия И.О">
+    </div>
   </div>
 
   <div class="card">
@@ -642,6 +607,43 @@
   </div>
 
   <button class="btn btn-primary" id="sendHomeBtn" onclick="submitHome()">
+    📤 Телеграмга жўнатиш
+  </button>
+</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="loginSection" class="section">
+
+  <div class="card">
+    <div class="card-title">📋 Асосий маълумот</div>
+    <div class="form-group">
+      <label>📋 Карта рақами</label>
+      <input type="text" id="loginCardNumber" placeholder="Карта рақамини киритинг" inputmode="numeric">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🏢 Ташкилот</div>
+    <div class="form-group">
+      <label>Тури</label>
+      <select id="loginOrgType">
+        <option value="МЧЖ">МЧЖ</option>
+        <option value="ЯТТ">ЯТТ</option>
+        <option value="ОК">ОК</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Ташкилот номи</label>
+      <input type="text" id="loginOrgName" placeholder="SOMSA UZB">
+    </div>
+    <div class="form-group">
+      <label>Ташкилот тури</label>
+      <input type="text" id="loginOrgCategory" placeholder="Масалан: магазин">
+    </div>
+    <div class="fixed-label" id="loginOrgPreview">МЧЖ"..."</div>
+  </div>
+
+  <button class="btn btn-primary" id="sendLoginBtn" onclick="submitLogin()">
     📤 Телеграмга жўнатиш
   </button>
 </div>
@@ -677,13 +679,9 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
 (function () {
-  // ══════════════════════════════════════════
-  //  ⚠️ БУ ЕРГА ЎЗ МАЪЛУМОТЛАРИНГИЗНИ КИРИТИНГ
-  // ══════════════════════════════════════════
-  const BOT_TOKEN  = '1686923042:AAEjB-5G_j2LYYrjkxr5xJ_tbd0Q-JgKshE';   // @BotFather дан олинади
-  const CHANNEL_ID = '-1004304980473';  // Масалан: -1001234567890
+  const BOT_TOKEN  = '1686923042:AAEjB-5G_j2LYYrjkxr5xJ_tbd0Q-JgKshE';
+  const CHANNEL_ID = '-1004304980473';
 
-  // ──────────────────────────────────────────
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
 
@@ -696,45 +694,49 @@
   }
   const objDateEl = document.getElementById('objDate');
   objDateEl.value = getDate();
-  const _dateTimer = setInterval(() => { objDateEl.value = getDate(); }, 60000);
+  setInterval(() => { objDateEl.value = getDate(); }, 60000);
 
-  // ── Ташкилот preview ──
+  // ── Org preview (Объект) ──
   function updateOrgPreview() {
     const type = document.getElementById('orgType').value;
     const name = document.getElementById('orgName').value.trim();
     const cat  = document.getElementById('orgCategory').value.trim();
-    document.getElementById('orgPreview').textContent =
-      `${type}"${name || '...'}"${cat}`;
+    document.getElementById('orgPreview').textContent = `${type}"${name || '...'}"${cat}`;
   }
   ['orgType','orgName','orgCategory'].forEach(id =>
     document.getElementById(id).addEventListener('input', updateOrgPreview)
   );
   updateOrgPreview();
 
-  // ══════════════════════════════════════════
-  // ── Телефон рақамини форматлаш ──
-  // ══════════════════════════════════════════
+  // ── Org preview (Login) ──
+  function updateLoginOrgPreview() {
+    const type = document.getElementById('loginOrgType').value;
+    const name = document.getElementById('loginOrgName').value.trim();
+    const cat  = document.getElementById('loginOrgCategory').value.trim();
+    document.getElementById('loginOrgPreview').textContent = `${type}"${name || '...'}"${cat}`;
+  }
+  ['loginOrgType','loginOrgName','loginOrgCategory'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateLoginOrgPreview)
+  );
+  updateLoginOrgPreview();
+
+  // ── Телефон форматлаш ──
   function formatPhone(raw) {
-    // Faqat raqamlarni qoldirish
     const digits = raw.replace(/\D/g, '');
-    // 998 bilan boshlansa olib tashlash
     const local = digits.startsWith('998') ? digits.slice(3) : digits;
-    // 9 ta raqam bo'lsa formatlash: XX XXX XX XX
     if (local.length === 9) {
       return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7,9)}`;
     }
-    // 7 ta (eski format) yoki boshqa: bo'shliq qo'shib berish
     if (local.length >= 7) {
       return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7)}`.trim();
     }
     return local;
   }
 
-  // ── Har so'z bosh harfini katta qilish (FISh uchun) ──
+  // ── Har so'z bosh harfi katta (Кирил) ──
   function capitalizeWords(val) {
     return val.replace(/(^|\s)(\S)/gu, (m, space, char) => space + char.toUpperCase());
   }
-
   function applyCapitalizeWords(el) {
     function fix() {
       const pos = el.selectionStart;
@@ -748,30 +750,76 @@
     el.addEventListener('blur', fix);
   }
 
-  // ── Barcha harflarni katta qilish (tashkilot nomi uchun) ──
-  function applyUpperCase(el) {
+  // ── Tashkilot nomi: DOIM LOTIN HARFLARDA ──
+  // Kiril → Lotin (teskari) konvertatsiya
+  const cyrilToLatin = {
+    'а':'a','А':'A','б':'b','Б':'B','в':'v','В':'V','г':'g','Г':'G',
+    'д':'d','Д':'D','е':'e','Е':'E','ё':'yo','Ё':'Yo','ж':'j','Ж':'J',
+    'з':'z','З':'Z','и':'i','И':'I','й':'y','Й':'Y','к':'k','К':'K',
+    'л':'l','Л':'L','м':'m','М':'M','н':'n','Н':'N','о':'o','О':'O',
+    'п':'p','П':'P','р':'r','Р':'R','с':'s','С':'S','т':'t','Т':'T',
+    'у':'u','У':'U','ф':'f','Ф':'F','х':'x','Х':'X','ц':'ts','Ц':'Ts',
+    'ч':'ch','Ч':'Ch','ш':'sh','Ш':'Sh','щ':'sh','Щ':'Sh','ъ':"'",'Ъ':"'",
+    'ы':'i','Ы':'I','ь':"'",'Ь':"'",'э':'e','Э':'E','ю':'yu','Ю':'Yu',
+    'я':'ya','Я':'Ya','қ':'q','Қ':'Q','ғ':"g'",'Ғ':"G'",'ҳ':'h','Ҳ':'H',
+    'ў':"o'",'Ў':"O'",'нг':'ng','НГ':'NG',
+  };
+
+  function cyrilToLatinText(text) {
+    let result = '';
+    let i = 0;
+    while (i < text.length) {
+      // 2 belgili Kiril (нг, НГ)
+      if (i + 1 < text.length) {
+        const two = text[i] + text[i+1];
+        if (cyrilToLatin[two] !== undefined) {
+          result += cyrilToLatin[two];
+          i += 2;
+          continue;
+        }
+      }
+      const ch = text[i];
+      result += cyrilToLatin[ch] !== undefined ? cyrilToLatin[ch] : ch;
+      i++;
+    }
+    return result;
+  }
+
+  function applyOrgNameLatinOnly(el) {
     el.addEventListener('input', function() {
       const pos = this.selectionStart;
-      const newVal = this.value.toUpperCase();
-      if (newVal !== this.value) {
-        this.value = newVal;
+      // Avval Kiril → Lotin
+      let val = cyrilToLatinText(this.value);
+      // Keyin uppercase
+      val = val.toUpperCase();
+      if (val !== this.value) {
+        this.value = val;
+        const diff = val.length - this.value.length;
         try { this.setSelectionRange(pos, pos); } catch(e) {}
       }
     });
+    el.addEventListener('blur', function() {
+      let val = cyrilToLatinText(this.value).toUpperCase();
+      if (val !== this.value) this.value = val;
+    });
   }
 
-  // FISh va boshqa capitalize inputlar
-  ['hozOrganFish', 'homeFish', 'electric', 'pultBoshligi',
-   'orgCategory', 'mfy', 'street', 'homeMfy', 'homeStreet'].forEach(id => {
+  // Obyekt tashkilot nomi
+  const orgNameEl = document.getElementById('orgName');
+  if (orgNameEl) applyOrgNameLatinOnly(orgNameEl);
+
+  // Login tashkilot nomi
+  const loginOrgNameEl = document.getElementById('loginOrgName');
+  if (loginOrgNameEl) applyOrgNameLatinOnly(loginOrgNameEl);
+
+  // FISh inputlarga capitalize
+  ['hozOrganFish','homeFish','electric','pultBoshligi','homePultBoshligi',
+   'orgCategory','mfy','street','homeMfy','homeStreet','loginOrgCategory'].forEach(id => {
     const el = document.getElementById(id);
     if (el) applyCapitalizeWords(el);
   });
 
-  // Tashkilot nomiga uppercase ulash
-  const orgNameEl = document.getElementById('orgName');
-  if (orgNameEl) applyUpperCase(orgNameEl);
-
-  // Telefon inputlariga formatlash ulash
+  // Telefon inputlar
   const phoneInputIds = ['hozOrganTel1','hozOrganTel2','priborSim','homeTel'];
   phoneInputIds.forEach(id => {
     const el = document.getElementById(id);
@@ -781,94 +829,29 @@
       if (formatted) el.value = formatted;
     });
     el.addEventListener('input', () => {
-      // Faqat raqam va bo'shliq qolsin
       el.value = el.value.replace(/[^\d\s\-]/g, '');
     });
   });
 
   // ══════════════════════════════════════════
-  // ── Lotin → Kiril avtomatik o'girish ──
+  // ── Lotin → Kiril (barcha matn inputlar uchun) ──
   // ══════════════════════════════════════════
-  const latinToCyril = {
-    // Ikki belgili (avval tekshiriladi)
-    "sh":"ш","SH":"Ш","Sh":"Ш",
-    "ch":"ч","CH":"Ч","Ch":"Ч",
-    "gh":"ғ","GH":"Ғ","Gh":"Ғ",
-    "ng":"нг","NG":"НГ","Ng":"Нг",
-    "yo":"ё","YO":"Ё","Yo":"Ё",
-    "yu":"ю","YU":"Ю","Yu":"Ю",
-    "ya":"я","YA":"Я","Ya":"Я",
-    "ts":"ц","TS":"Ц","Ts":"Ц",
-    "yo":"ё","YO":"Ё",
-    "o'":"ў","O'":"Ў","o`":"ў","O`":"Ў",
-    "g'":"ғ","G'":"Ғ","g`":"ғ","G`":"Ғ",
-    // Bir belgili
-    "a":"а","A":"А",
-    "b":"б","B":"Б",
-    "d":"д","D":"Д",
-    "e":"е","E":"Е",
-    "f":"ф","F":"Ф",
-    "g":"г","G":"Г",
-    "h":"ҳ","H":"Ҳ",
-    "i":"и","I":"И",
-    "j":"ж","J":"Ж",
-    "k":"к","K":"К",
-    "l":"л","L":"Л",
-    "m":"м","M":"М",
-    "n":"н","N":"Н",
-    "o":"о","O":"О",
-    "p":"п","P":"П",
-    "q":"қ","Q":"Қ",
-    "r":"р","R":"Р",
-    "s":"с","S":"С",
-    "t":"т","T":"Т",
-    "u":"у","U":"У",
-    "v":"в","V":"В",
-    "x":"х","X":"Х",
-    "y":"й","Y":"Й",
-    "z":"з","Z":"З",
-    "'":"ъ","'":"ъ",
-    // Raqamlar o'zgarishsiz
-  };
+  const skipIds = new Set([
+    'objCardNumber','ktsNumber','loginCardNumber',
+    'gomNumber','priborSim',
+    'hozOrganTel1','hozOrganTel2','homeTel','objDate',
+    'objLat','objLng','homeLat','homeLng',
+    'pultNumber','houseNumber','homeHouse','homeApt',
+    'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult',
+    // Tashkilot nomlari (ular lotin bo'lishi kerak)
+    'orgName','loginOrgName'
+  ]);
 
-  function latinToCyrillicText(text) {
-    let result = '';
-    let i = 0;
-    while (i < text.length) {
-      let found = false;
-      // 2 belgili tekshir (avval)
-      if (i + 1 < text.length) {
-        const two = text[i] + text[i+1];
-        if (latinToCyril[two] !== undefined) {
-          result += latinToCyril[two];
-          i += 2;
-          found = true;
-        }
-      }
-      if (!found) {
-        const one = text[i];
-        result += latinToCyril[one] !== undefined ? latinToCyril[one] : one;
-        i++;
-      }
-    }
-    return result;
-  }
-
-  // Matn inputlariga lotin→kiril ulash (telefon va raqam inputlar bundan mustasno)
-  const skipIds = new Set(['objCardNumber','ktsNumber','gomNumber','priborSim',
-    'hozOrganTel1','hozOrganTel2','homeTel','objDate','objLat','objLng',
-    'homeLat','homeLng','pultNumber','houseNumber','homeHouse','homeApt',
-    'homePodezd','homeEtaj','homeDomEtaj','homeGom','homePult']);
-
-  // ── Lotin → Kiril: belgi-belgi o'qish (mobil uchun ishonchli) ──
   function convertLatinToCyrillic(text) {
-    // Kiril+lotin aralash ikki belgili juftliklar (s→с bo'lgandan keyin +h)
     const mixedTwo = {
       'сh':'ш','Сh':'Ш','СH':'Ш',
       'нg':'нг','Нg':'Нг','НG':'НГ',
-      'ғh':'ғ', // g' + h — kerak emas lekin xavfsiz
     };
-    // To'liq lotin ikki belgili juftliklar
     const latinTwo = {
       'sh':'ш','SH':'Ш','Sh':'Ш',
       'ch':'ч','CH':'Ч','Ch':'Ч',
@@ -879,7 +862,6 @@
       'ya':'я','YA':'Я','Ya':'Я',
       'ts':'ц','TS':'Ц','Ts':'Ц',
     };
-    // Bir belgili lotin
     const one = {
       'a':'а','A':'А','b':'б','B':'Б','d':'д','D':'Д',
       'e':'е','E':'Е','f':'ф','F':'Ф','g':'г','G':'Г',
@@ -891,37 +873,21 @@
       'x':'х','X':'Х','y':'й','Y':'Й','z':'з','Z':'З',
       "'":'ъ',"'":'ъ',
     };
-    // Maxsus: o' va g' belgilari
     const apostrophe = ["'","'","`"];
-
     let result = '';
     let i = 0;
     while (i < text.length) {
-      // 1) Avval kiril+lotin aralash ikki belgili tekshir (masalan: сh)
       if (i + 1 < text.length) {
         const two = text[i] + text[i+1];
-        if (mixedTwo[two]) {
-          result += mixedTwo[two];
-          i += 2;
-          continue;
+        if (mixedTwo[two]) { result += mixedTwo[two]; i += 2; continue; }
+        if ((text[i]==='o'||text[i]==='O') && apostrophe.includes(text[i+1])) {
+          result += text[i]==='o' ? 'ў' : 'Ў'; i += 2; continue;
         }
-        // 2) o' va g' belgilari (apostrof bilan)
-        if ((text[i] === 'o' || text[i] === 'O') && apostrophe.includes(text[i+1])) {
-          result += text[i] === 'o' ? 'ў' : 'Ў';
-          i += 2; continue;
+        if ((text[i]==='g'||text[i]==='G') && apostrophe.includes(text[i+1])) {
+          result += text[i]==='g' ? 'ғ' : 'Ғ'; i += 2; continue;
         }
-        if ((text[i] === 'g' || text[i] === 'G') && apostrophe.includes(text[i+1])) {
-          result += text[i] === 'g' ? 'ғ' : 'Ғ';
-          i += 2; continue;
-        }
-        // 3) Lotin ikki belgili juftlik
-        if (latinTwo[two]) {
-          result += latinTwo[two];
-          i += 2;
-          continue;
-        }
+        if (latinTwo[two]) { result += latinTwo[two]; i += 2; continue; }
       }
-      // 4) Bir belgili lotin
       const ch = text[i];
       result += one[ch] ?? ch;
       i++;
@@ -931,13 +897,11 @@
 
   document.querySelectorAll('input[type=text], textarea').forEach(el => {
     if (skipIds.has(el.id)) return;
-
     el.addEventListener('input', function() {
       const pos = this.selectionStart;
       const oldVal = this.value;
       const newVal = convertLatinToCyrillic(oldVal);
       if (newVal !== oldVal) {
-        // Kursor pozitsiyasini saqlab o'zgartirish
         const diff = newVal.length - oldVal.length;
         this.value = newVal;
         try { this.setSelectionRange(pos + diff, pos + diff); } catch(e) {}
@@ -945,13 +909,14 @@
     });
   });
 
-
   // ── Tabs ──
   window.switchTab = function(tab) {
-    ['object','home'].forEach(t => {
+    ['object','home','login'].forEach(t => {
       document.getElementById(t+'Section').classList.toggle('active', t === tab);
-      document.getElementById('tab'+(t==='object'?'Object':'Home')).classList.toggle('active', t === tab);
     });
+    document.getElementById('tabObject').classList.toggle('active', tab === 'object');
+    document.getElementById('tabHome').classList.toggle('active', tab === 'home');
+    document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
   };
 
   // ── Toast ──
@@ -966,7 +931,7 @@
   function showLoader() { document.getElementById('loader').classList.add('show'); }
   function hideLoader() { document.getElementById('loader').classList.remove('show'); }
 
-  // ── Telegram Bot API орқали каналга юбориш ──
+  // ── Kaналга юбориш ──
   async function sendToChannel(text) {
     showLoader();
     try {
@@ -974,11 +939,7 @@
         `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: CHANNEL_ID,
-            text: text,
-            parse_mode: 'HTML'
-          })
+          body: JSON.stringify({ chat_id: CHANNEL_ID, text: text, parse_mode: 'HTML' })
         }
       );
       const data = await res.json();
@@ -1004,13 +965,11 @@
     mapTarget = target;
     pendingLatLng = null;
     document.getElementById('mapModal').classList.add('open');
-
     setTimeout(() => {
       if (!mapInst) {
         mapInst = L.map('locationMap', { attributionControl: false, zoomControl: true })
                    .setView([41.3111, 69.2797], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 })
-         .addTo(mapInst);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapInst);
         mapInst.on('click', e => {
           pendingLatLng = e.latlng;
           if (mapMarker) mapMarker.setLatLng(e.latlng);
@@ -1019,8 +978,6 @@
         });
       }
       mapInst.invalidateSize();
-
-      // Агар аввал танланган бўлса, маркерни кўрсат
       const latEl = document.getElementById(target === 'object' ? 'objLat' : 'homeLat');
       const lngEl = document.getElementById(target === 'object' ? 'objLng' : 'homeLng');
       if (latEl.value && lngEl.value) {
@@ -1045,19 +1002,16 @@
     const lat = pendingLatLng.lat.toFixed(6);
     const lng = pendingLatLng.lng.toFixed(6);
     const coord = `${lat}, ${lng}`;
-
     if (mapTarget === 'object') {
       document.getElementById('objLat').value = lat;
       document.getElementById('objLng').value = lng;
       const d = document.getElementById('objLocDisplay');
-      d.textContent = `✅ ${coord}`;
-      d.classList.add('set');
+      d.textContent = `✅ ${coord}`; d.classList.add('set');
     } else {
       document.getElementById('homeLat').value = lat;
       document.getElementById('homeLng').value = lng;
       const d = document.getElementById('homeLocDisplay');
-      d.textContent = `✅ ${coord}`;
-      d.classList.add('set');
+      d.textContent = `✅ ${coord}`; d.classList.add('set');
     }
     toast('✅ Локация белгиланди');
     document.getElementById('mapModal').classList.remove('open');
@@ -1065,7 +1019,7 @@
     if (mapMarker) { mapInst.removeLayer(mapMarker); mapMarker = null; }
   };
 
-  // ── Юборувчи маълумоти ──
+  // ── Юборувчи ──
   function getSenderLine() {
     const user = tg?.initDataUnsafe?.user;
     if (!user) return null;
@@ -1097,18 +1051,13 @@
     const fish    = document.getElementById('hozOrganFish').value.trim();
     const lat     = document.getElementById('objLat').value;
     const lng     = document.getElementById('objLng').value;
-
     const orgFull = `${type}"${name}"${cat}`;
-
     let address = `Шайхонтохур туман ${mfy} МФЙ ${street} кўча ${house}`;
     if (orientir) address += ` (Ориентир ${orientir})`;
     if (landmark) address += ` ${landmark}`;
-
     let telLine = tel1 ? `+998 ${formatPhone(tel1)}` : '---';
     if (tel2) telLine += ` / +998 ${formatPhone(tel2)}`;
-
     const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
-
     return (
 `📋 <b>Объект маълумотлари</b>
 
@@ -1131,23 +1080,22 @@ ${getSenderLine() || ""}`.trimEnd()
 
   // ── Хонадон матни ──
   function buildHomeText() {
-    const kts     = document.getElementById('ktsNumber').value.trim() || '---';
-    const fish    = document.getElementById('homeFish').value.trim() || '---';
-    const tel     = document.getElementById('homeTel').value.trim() || '---';
-    const mfy     = document.getElementById('homeMfy').value.trim() || '---';
-    const street  = document.getElementById('homeStreet').value.trim() || '---';
-    const house   = document.getElementById('homeHouse').value.trim() || '---';
-    const apt     = document.getElementById('homeApt').value.trim() || '---';
-    const podezd  = document.getElementById('homePodezd').value.trim() || '---';
-    const etaj    = document.getElementById('homeEtaj').value.trim() || '---';
-    const domEtaj = document.getElementById('homeDomEtaj').value.trim() || '---';
-    const gom     = document.getElementById('homeGom').value.trim() || '---';
-    const pult    = document.getElementById('homePult').value.trim() || '---';
-    const lat     = document.getElementById('homeLat').value;
-    const lng     = document.getElementById('homeLng').value;
-
+    const kts      = document.getElementById('ktsNumber').value.trim() || '---';
+    const fish     = document.getElementById('homeFish').value.trim() || '---';
+    const tel      = document.getElementById('homeTel').value.trim() || '---';
+    const mfy      = document.getElementById('homeMfy').value.trim() || '---';
+    const street   = document.getElementById('homeStreet').value.trim() || '---';
+    const house    = document.getElementById('homeHouse').value.trim() || '---';
+    const apt      = document.getElementById('homeApt').value.trim() || '---';
+    const podezd   = document.getElementById('homePodezd').value.trim() || '---';
+    const etaj     = document.getElementById('homeEtaj').value.trim() || '---';
+    const domEtaj  = document.getElementById('homeDomEtaj').value.trim() || '---';
+    const gom      = document.getElementById('homeGom').value.trim() || '---';
+    const pult     = document.getElementById('homePult').value.trim() || '---';
+    const pultBosh = document.getElementById('homePultBoshligi').value.trim() || '---';
+    const lat      = document.getElementById('homeLat').value;
+    const lng      = document.getElementById('homeLng').value;
     const loc = (lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган';
-
     return (
 `🏠 <b>Хонадон маълумотлари</b>
 
@@ -1162,85 +1110,42 @@ ${getSenderLine() || ""}`.trimEnd()
 Дом этажи: ${domEtaj}
 Қайси ГОМ: ${gom}
 Пулт: ${pult}
+Пулт Бошлиғи: ${pultBosh}
 Локация: ${loc}
 
 ${getSenderLine() || ""}`.trimEnd()
     );
   }
 
-  // ── Бот чатига юбориш (илова очган фойдаланувчига) ──
-  async function sendToBotChat(text) {
-    // initDataUnsafe ishonchsiz — avval u yerdan, keyin initData dan olamiz
-    let userId = tg?.initDataUnsafe?.user?.id;
+  // ── Login матни ──
+  function buildLoginText() {
+    const card = document.getElementById('loginCardNumber').value.trim() || '---';
+    const type = document.getElementById('loginOrgType').value;
+    const name = document.getElementById('loginOrgName').value.trim();
+    const cat  = document.getElementById('loginOrgCategory').value.trim();
+    const orgFull = `${type}"${name}"${cat}`;
+    return (
+`🔑 <b>Login маълумотлари</b>
 
-    // Agar initDataUnsafe bo'sh bo'lsa, initData string'dan parse qilamiz
-    if (!userId && tg?.initData) {
-      try {
-        const params = new URLSearchParams(tg.initData);
-        const userStr = params.get('user');
-        if (userStr) {
-          const parsed = JSON.parse(userStr);
-          userId = parsed?.id;
-        }
-      } catch (e) {}
-    }
+Карта рақами: ${card}
+Ташкилот: ${orgFull}
 
-    if (!userId) {
-      toast('⚠️ Фойдаланувчи ID аниқланмади');
-      return;
-    }
-
-    try {
-      const res = await fetch(
-        `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: userId,
-            text: text,
-            parse_mode: 'HTML'
-          })
-        }
-      );
-      const data = await res.json();
-      if (!data.ok) {
-        // Eng ko'p uchraydigan xato: foydalanuvchi botni bloklagan yoki /start bosmagam
-        const desc = data.description || '';
-        if (desc.includes('bot was blocked') || desc.includes('chat not found') || desc.includes('Forbidden')) {
-          toast('⚠️ Сиз ботни блокладингиз ёки /start босмагансиз');
-        } else {
-          toast('⚠️ Бот чати хато: ' + desc);
-        }
-      }
-    } catch (e) {
-      toast('⚠️ Бот чатига юборишда хато');
-    }
+${getSenderLine() || ""}`.trimEnd()
+    );
   }
 
-  // ── Submit ──
-  window.submitObject = async function() {
-    const text = buildObjectText();
-    await sendToChannel(text);
-  };
+  window.submitObject = async function() { await sendToChannel(buildObjectText()); };
+  window.submitHome   = async function() { await sendToChannel(buildHomeText()); };
+  window.submitLogin  = async function() { await sendToChannel(buildLoginText()); };
 
-  window.submitHome = async function() {
-    const text = buildHomeText();
-    await sendToChannel(text);
-  };
-
-  // ── GPS: Менинг жойим ──
+  // ── GPS ──
   window.goToMyLocation = function() {
     const btn = document.getElementById('gpsBtn');
-    if (!navigator.geolocation) {
-      toast('⚠️ Геолокация қўллаб-қувватланмайди');
-      return;
-    }
-    btn.classList.add('loading');
-    btn.textContent = '⏳';
+    if (!navigator.geolocation) { toast('⚠️ Геолокация қўллаб-қувватланмайди'); return; }
+    btn.classList.add('loading'); btn.textContent = '⏳';
     navigator.geolocation.getCurrentPosition(
       pos => {
-        btn.classList.remove('loading');
-        btn.textContent = '📍';
+        btn.classList.remove('loading'); btn.textContent = '📍';
         const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
         pendingLatLng = ll;
         mapInst.setView(ll, 17);
@@ -1250,19 +1155,13 @@ ${getSenderLine() || ""}`.trimEnd()
         toast('✅ Жойингиз аниқланди');
       },
       err => {
-        btn.classList.remove('loading');
-        btn.textContent = '📍';
-        const msgs = {
-          1: '⚠️ Геолокацияга рухсат беринг',
-          2: '⚠️ Жой аниқлаб бўлмади',
-          3: '⚠️ Вақт тугади, қайта уриниб кўринг'
-        };
+        btn.classList.remove('loading'); btn.textContent = '📍';
+        const msgs = { 1:'⚠️ Геолокацияга рухсат беринг', 2:'⚠️ Жой аниқлаб бўлмади', 3:'⚠️ Вақт тугади' };
         toast(msgs[err.code] || '⚠️ Хато юз берди');
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
-
 
   document.getElementById('mapModal').addEventListener('click', e => {
     if (e.target === document.getElementById('mapModal')) closeMap();
