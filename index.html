@@ -270,7 +270,6 @@
       border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 600px;
-      /* 75vh — buttons always visible */
       height: 75vh;
       display: flex;
       flex-direction: column;
@@ -474,11 +473,11 @@
       <div class="fixed-label">📍 Шайхонтохур туман</div>
       <div class="form-group">
         <label>МФЙ номи</label>
-        <input type="text" id="mfy" placeholder="Масалан: Комолон МФЙ">
+        <input type="text" id="mfy" placeholder="Масалан: Комолон">
       </div>
       <div class="form-group">
         <label>Кўча номи</label>
-        <input type="text" id="street" placeholder="Масалан: Комолон кўча">
+        <input type="text" id="street" placeholder="Масалан: Комолон">
       </div>
       <div class="form-group">
         <label>Дом рақами</label>
@@ -602,11 +601,11 @@
       <div class="card-title">📍 Манзил</div>
       <div class="form-group">
         <label>МФЙ номи</label>
-        <input type="text" id="homeMfy" placeholder="Масалан: Гулобод МФЙ">
+        <input type="text" id="homeMfy" placeholder="Масалан: Гулобод">
       </div>
       <div class="form-group">
         <label>Кўча номи</label>
-        <input type="text" id="homeStreet" placeholder="Масалан: Гул обод кўчаси">
+        <input type="text" id="homeStreet" placeholder="Масалан: Гул обод">
       </div>
       <div class="row">
         <div class="form-group">
@@ -805,12 +804,17 @@
   updateLoginOrgPreview();
 
   // ── Telefon formatlash ──
+  // FIX: faqat 9 ta lokal raqam olinadi, +998 prefiks inputda yo'q
   function formatPhone(raw) {
+    // Barcha raqam bo'lmagan belgilarni olib tashlash
     const digits = raw.replace(/\D/g, '');
+    // Agar 998 bilan boshlansa, uni kesib tashlash
     const local = digits.startsWith('998') ? digits.slice(3) : digits;
-    if (local.length === 9) return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7,9)}`;
-    if (local.length >= 7) return `${local.slice(0,2)} ${local.slice(2,5)} ${local.slice(5,7)} ${local.slice(7)}`.trim();
-    return local;
+    // Faqat 9 ta raqamdan iborat lokal qism bilan ishlash
+    const d = local.slice(0, 9);
+    if (d.length === 9) return `${d.slice(0,2)} ${d.slice(2,5)} ${d.slice(5,7)} ${d.slice(7,9)}`;
+    if (d.length >= 7) return `${d.slice(0,2)} ${d.slice(2,5)} ${d.slice(5,7)} ${d.slice(7)}`.trim();
+    return d;
   }
 
   // ── Capitalize words ──
@@ -914,11 +918,9 @@
     }
     return r;
   }
-  // Kiril + lotin juftliklari (s→с + h = ш, c→ч + h = ч yo'q, lekin с+h=ш, ч+h yo'q)
-  // Oldingi belgi kiril bo'lib, yangi lotin bilan birga ikki belgili juftlik hosil qilsa
   const cyrilPlusLatin = {
     'сh':'ш','Сh':'Ш','сH':'Ш','СH':'Ш',
-    'чh':'ч', // ch already done, this won't trigger
+    'чh':'ч',
     'нg':'нг','Нg':'Нг','нG':'нг','НG':'НГ',
   };
 
@@ -928,8 +930,6 @@
       const pos = this.selectionStart;
       let val = this.value;
 
-      // 1-qadam: kiril+lotin juftlikni tekshir (masalan: с+h → ш)
-      // Faqat yangi belgi qo'shilganda (pos > 0)
       if (pos >= 2) {
         const prevChar = val[pos - 2];
         const newChar  = val[pos - 1];
@@ -939,11 +939,10 @@
           this.value = val;
           const newPos = pos - 2 + cyrilPlusLatin[pair].length;
           try { this.setSelectionRange(newPos, newPos); } catch(e2) {}
-          return; // bu qadam bajarilib bo'ldi
+          return;
         }
       }
 
-      // 2-qadam: oddiy lotin→kiril konvertatsiya
       const newVal = convertLatinToCyrillic(val);
       if (newVal !== val) {
         const diff = newVal.length - val.length;
@@ -981,12 +980,11 @@
     else if (pendingSendType === 'login') await sendToChannel(buildLoginText());
     pendingSendType = null;
   };
-  // Overlay tashqarisiga bosish
   document.getElementById('confirmOverlay').addEventListener('click', e => {
     if (e.target === document.getElementById('confirmOverlay')) closeConfirm();
   });
 
-  // ── Kaналга yuborish ──
+  // ── Kanalga yuborish ──
   async function sendToChannel(text) {
     showLoader();
     try {
@@ -1095,6 +1093,12 @@
     return `👤 Юборди: ${fullName}${username}${id}`;
   }
 
+  // ── Koordinatani vergul bilan formatlash (Объект uchun) ──
+  // nuqtani vergul bilan almashtirish: 41.311469 → 41,311469
+  function coordWithComma(val) {
+    return val.replace('.', ',');
+  }
+
   // ── Matnlar ──
   function buildObjectText() {
     const card    = document.getElementById('objCardNumber').value.trim() || '---';
@@ -1118,11 +1122,21 @@
     const lat     = document.getElementById('objLat').value;
     const lng     = document.getElementById('objLng').value;
     const orgFull = `${type}"${name}"${cat}`;
+
+    // FIX: МФЙ va кўча so'zlari faqat matn qurishda qo'shiladi, maydon qiymatida bo'lmasligi kerak
     let address = `Шайхонтохур туман ${mfy} МФЙ ${street} кўча ${house}`;
     if (orientir) address += ` (Ориентир ${orientir})`;
     if (landmark) address += ` ${landmark}`;
+
     let telLine = tel1 ? `+998 ${formatPhone(tel1)}` : '---';
     if (tel2) telLine += ` / +998 ${formatPhone(tel2)}`;
+
+    // FIX: Объект lokatsiyasida koordinatalar vergul bilan ajratiladi
+    let locStr = 'Киритилмаган';
+    if (lat && lng) {
+      locStr = `${coordWithComma(lat)} - ${coordWithComma(lng)}`;
+    }
+
     return `📋 <b>Объект маълумотлари</b>
 
 Карта рақами: ${card}
@@ -1136,7 +1150,7 @@
 Қайси ПУЛТ: Шайхонтохур ПТОР - ${pultNum || '---'}
 Ҳоз орган тел: ${telLine}
 Ҳоз орган ФИШ: ${fish || '---'}
-Локация: ${(lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган'}
+Локация: ${locStr}
 
 ${getSenderLine() || ''}`.trimEnd();
   }
@@ -1157,6 +1171,8 @@ ${getSenderLine() || ''}`.trimEnd();
     const pultBosh = document.getElementById('homePultBoshligi').value.trim() || '---';
     const lat      = document.getElementById('homeLat').value;
     const lng      = document.getElementById('homeLng').value;
+
+    // FIX: МФЙ va кўча so'zlari faqat matn qurishda qo'shiladi
     return `🏠 <b>Хонадон маълумотлари</b>
 
 КТС рақами: ${kts}
