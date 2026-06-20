@@ -409,134 +409,6 @@
       .map-footer { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
     }
 
-    /* ══════════════════════════════════════════════════
-       QO'SHIMCHA: NATIJA (RESULT) MODAL — COPY TUGMALARI
-       Quyidagi stillar faqat yangi natija oynasi uchun.
-       Mavjud stillarga tegilmadi.
-       ══════════════════════════════════════════════════ */
-    .result-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 750;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .result-overlay.open { display: flex; }
-    .result-box {
-      background: #fff;
-      border-radius: 18px;
-      width: 100%;
-      max-width: 420px;
-      max-height: 85vh;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .result-header {
-      padding: 14px 16px;
-      display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--gray-200);
-      flex-shrink: 0;
-    }
-    .result-header-title {
-      font-size: 0.98rem; font-weight: 700; color: var(--gray-900);
-      display: flex; align-items: center; gap: 6px;
-    }
-    .result-close {
-      width: 30px; height: 30px; border-radius: 50%; border: none;
-      background: var(--gray-200); font-size: 1rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gray-700); flex-shrink: 0;
-    }
-    .result-hint {
-      font-size: 0.78rem;
-      color: var(--gray-600);
-      padding: 10px 16px 0;
-      flex-shrink: 0;
-    }
-    .result-body {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 10px 12px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .copy-item {
-      display: flex;
-      align-items: stretch;
-      gap: 0;
-      border: 1.5px solid var(--gray-200);
-      border-radius: 10px;
-      overflow: hidden;
-      background: var(--gray-50);
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .copy-item:active { background: var(--blue-soft); border-color: var(--blue); }
-    .copy-item.copied { background: var(--green-soft); border-color: #6ee7b7; }
-    .copy-item-text {
-      flex: 1;
-      min-width: 0;
-      padding: 10px 11px;
-      font-size: 0.86rem;
-      color: var(--text);
-      white-space: pre-wrap;
-      word-break: break-word;
-      line-height: 1.45;
-    }
-    .copy-item-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: var(--blue);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      display: block;
-      margin-bottom: 2px;
-    }
-    .copy-item-icon {
-      flex-shrink: 0;
-      width: 38px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      color: var(--gray-600);
-      border-left: 1.5px solid var(--gray-200);
-      background: #fff;
-    }
-    .copy-item.copied .copy-item-icon { color: var(--green); }
-    .copy-item.copied .copy-item-icon::after { content: ''; }
-    .result-footer {
-      padding: 12px 16px;
-      border-top: 1px solid var(--gray-200);
-      flex-shrink: 0;
-      background: #fff;
-    }
-    .result-footer .btn { font-size: 0.9rem; padding: 12px; }
-
-    @media (prefers-color-scheme: dark) {
-      .result-box { background: #161b22; }
-      .result-header { border-bottom-color: #30363d; }
-      .result-header-title { color: #e5e7eb; }
-      .result-close { background: #30363d; color: #c9d1d9; }
-      .result-hint { color: #9ca3af; }
-      .copy-item { background: #0d1117; border-color: #30363d; }
-      .copy-item:active { background: rgba(26,86,219,0.18); border-color: var(--blue); }
-      .copy-item.copied { background: rgba(5,150,105,0.15); border-color: #059669; }
-      .copy-item-text { color: #e5e7eb; }
-      .copy-item-icon { background: #161b22; border-left-color: #30363d; color: #9ca3af; }
-      .copy-item.copied .copy-item-icon { color: #6ee7b7; }
-      .result-footer { border-top-color: #30363d; background: #161b22; }
-    }
-
-    @supports (padding: env(safe-area-inset-bottom)) {
-      .result-body { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
-    }
   </style>
 </head>
 <body>
@@ -873,24 +745,6 @@
 <!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
-<!-- ══════════════════════════════════════════════════
-     QO'SHIMCHA: NATIJA (RESULT) MODAL — COPY TUGMALARI
-     Telegramga yuborilgandan keyin ochiladi.
-     ══════════════════════════════════════════════════ -->
-<div class="result-overlay" id="resultOverlay">
-  <div class="result-box">
-    <div class="result-header">
-      <span class="result-header-title">✅ Юборилди</span>
-      <button class="result-close" onclick="closeResult()">✕</button>
-    </div>
-    <div class="result-hint">Нусха олиш учун керакли қаторга босинг</div>
-    <div class="result-body" id="resultBody"></div>
-    <div class="result-footer">
-      <button class="btn btn-primary" onclick="closeResult()">Тайёр</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
@@ -1122,16 +976,9 @@
   };
   window.doConfirmedSend = async function() {
     document.getElementById('confirmOverlay').classList.remove('open');
-    if (pendingSendType === 'object') {
-      const ok = await sendToChannel(buildObjectText());
-      if (ok) openResult(buildObjectCopyItems());
-    } else if (pendingSendType === 'home') {
-      const ok = await sendToChannel(buildHomeText());
-      if (ok) openResult(buildHomeCopyItems());
-    } else if (pendingSendType === 'login') {
-      const ok = await sendToChannel(buildLoginText());
-      if (ok) openResult(buildLoginCopyItems());
-    }
+    if (pendingSendType === 'object') await sendToChannel(buildObjectText());
+    else if (pendingSendType === 'home') await sendToChannel(buildHomeText());
+    else if (pendingSendType === 'login') await sendToChannel(buildLoginText());
     pendingSendType = null;
   };
   document.getElementById('confirmOverlay').addEventListener('click', e => {
@@ -1282,29 +1129,32 @@
     if (orientir) address += ` (Ориентир ${orientir})`;
     if (landmark) address += ` ${landmark}`;
 
-    let telLine = tel1 ? `+998 ${formatPhone(tel1)}` : '---';
-    if (tel2) telLine += ` / +998 ${formatPhone(tel2)}`;
+    const techBlock =
+`ГОМ: ${gom || '---'}
+Прибор СИМ: +998 ${pribor ? formatPhone(pribor) : '---'}
+Электрик: ${elec || '---'}
+Пулт Бошлиғи: ${pultBosh || '---'}
+Сана: ${sana}`;
+
+    let telCodeLine = tel1 ? `<code>+998 ${formatPhone(tel1)}</code>` : '---';
+    if (tel2) telCodeLine += ` / <code>+998 ${formatPhone(tel2)}</code>`;
 
     // FIX: Объект lokatsiyasida koordinatalar vergul bilan ajratiladi
-    let locStr = 'Киритилмаган';
+    let locCodeStr = 'Киритилмаган';
     if (lat && lng) {
-      locStr = `${coordWithComma(lat)} - ${coordWithComma(lng)}`;
+      locCodeStr = `<code>${coordWithComma(lat)}</code> - <code>${coordWithComma(lng)}</code>`;
     }
 
     return `📋 <b>Объект маълумотлари</b>
 
-Карта рақами: ${card}
-Ташкилот: ${orgFull}
-Манзил: ${address}
-ГОМ: ${gom || '---'}
-Прибор СИМ: +998 ${pribor ? formatPhone(pribor) : '---'}
-Электрик: ${elec || '---'}
-Пулт Бошлиғи: ${pultBosh || '---'}
-Сана: ${sana}
-Қайси ПУЛТ: Шайхонтохур ПТОР - ${pultNum || '---'}
-Ҳоз орган тел: ${telLine}
-Ҳоз орган ФИШ: ${fish || '---'}
-Локация: ${locStr}
+Карта рақами: <code>${card}</code>
+Ташкилот: <code>${orgFull}</code>
+Манзил: <code>${address}</code>
+<code>${techBlock}</code>
+Қайси ПУЛТ: <code>Шайхонтохур ПТОР - ${pultNum || '---'}</code>
+Ҳоз орган тел: ${telCodeLine}
+Ҳоз орган ФИШ: <code>${fish || '---'}</code>
+Локация: ${locCodeStr}
 
 ${getSenderLine() || ''}`.trimEnd();
   }
@@ -1327,12 +1177,17 @@ ${getSenderLine() || ''}`.trimEnd();
     const lng      = document.getElementById('homeLng').value;
 
     // FIX: МФЙ va кўча so'zlari faqat matn qurishda qo'shiladi
+    let homeLocCode = 'Киритилмаган';
+    if (lat && lng) {
+      homeLocCode = `<code>${lat}</code>, <code>${lng}</code>`;
+    }
+
     return `🏠 <b>Хонадон маълумотлари</b>
 
-КТС рақами: ${kts}
-Ҳоз орган ФИШ: ${fish}
-Ҳоз орган Тел: +998 ${formatPhone(tel)}
-Манзил: ${mfy} МФЙ ${street} кўчаси
+КТС рақами: <code>${kts}</code>
+Ҳоз орган ФИШ: <code>${fish}</code>
+Ҳоз орган Тел: <code>+998 ${formatPhone(tel)}</code>
+Манзил: <code>${mfy} МФЙ ${street} кўчаси</code>
 Уй рақами: ${house}
 Хонадон рақами: ${apt}
 Подъезд: ${podezd}
@@ -1340,8 +1195,8 @@ ${getSenderLine() || ''}`.trimEnd();
 Дом этажи: ${domEtaj}
 Қайси ГОМ: ${gom}
 Пулт: ${pult}
-Пулт Бошлиғи: ${pultBosh}
-Локация: ${(lat && lng) ? `${lat}, ${lng}` : 'Киритилмаган'}
+<code>Пулт Бошлиғи: ${pultBosh}</code>
+Локация: ${homeLocCode}
 
 ${getSenderLine() || ''}`.trimEnd();
   }
@@ -1353,170 +1208,10 @@ ${getSenderLine() || ''}`.trimEnd();
     const cat  = document.getElementById('loginOrgCategory').value.trim();
     return `🔑 <b>Login маълумотлари</b>
 
-Карта рақами: ${card}
-Ташкилот: ${type}"${name}"${cat}
+Карта рақами: <code>${card}</code>
+Ташкилот: <code>${type}"${name}"${cat}</code>
 
 ${getSenderLine() || ''}`.trimEnd();
-  }
-
-  /* ══════════════════════════════════════════════════
-     QO'SHIMCHA: NATIJA OYNASI VA NUSXALASH FUNKSIYALARI
-     Yuqoridagi build*Text() funksiyalariga tegilmadi —
-     faqat shu matnlardan foydalanib alohida "copy item"
-     ro'yxati tuziladi.
-     ══════════════════════════════════════════════════ */
-
-  // Har bir element: { label, value } — label yozuv ustida kichik
-  // yorliq, value esa aynan nusxalanadigan matn.
-  function buildObjectCopyItems() {
-    const card    = document.getElementById('objCardNumber').value.trim() || '---';
-    const type    = document.getElementById('orgType').value;
-    const name    = document.getElementById('orgName').value.trim();
-    const cat     = document.getElementById('orgCategory').value.trim();
-    const mfy     = document.getElementById('mfy').value.trim();
-    const street  = document.getElementById('street').value.trim();
-    const house   = document.getElementById('houseNumber').value.trim();
-    const orientir= document.getElementById('orientir').value.trim();
-    const landmark= document.getElementById('landmarkDesc').value.trim();
-    const gom     = document.getElementById('gomNumber').value.trim();
-    const pribor  = document.getElementById('priborSim').value.trim();
-    const elec    = document.getElementById('electric').value.trim();
-    const pultBosh= document.getElementById('pultBoshligi').value.trim();
-    const sana    = document.getElementById('objDate').value;
-    const pultNum = document.getElementById('pultNumber').value.trim();
-    const tel1    = document.getElementById('hozOrganTel1').value.trim();
-    const tel2    = document.getElementById('hozOrganTel2').value.trim();
-    const fish    = document.getElementById('hozOrganFish').value.trim();
-    const lat     = document.getElementById('objLat').value;
-    const lng     = document.getElementById('objLng').value;
-
-    const orgFull = `${type}"${name}"${cat}`;
-    let address = `Шайхонтохур туман ${mfy} МФЙ ${street} кўча ${house}`;
-    if (orientir) address += ` (Ориентир ${orientir})`;
-    if (landmark) address += ` ${landmark}`;
-
-    const items = [];
-    items.push({ label: 'Ташкилот', value: orgFull });
-    items.push({ label: 'Манзил', value: address });
-
-    // Texnik blok — to'liq, bir butun nusxa (ГОМ дан Сана гача)
-    const techBlock =
-`ГОМ: ${gom || '---'}
-Прибор СИМ: +998 ${pribor ? formatPhone(pribor) : '---'}
-Электрик: ${elec || '---'}
-Пулт Бошлиғи: ${pultBosh || '---'}
-Сана: ${sana}`;
-    items.push({ label: 'Техник маълумотлар', value: techBlock });
-
-    items.push({ label: 'Қайси ПУЛТ', value: `Шайхонтохур ПТОР - ${pultNum || '---'}` });
-    if (tel1) items.push({ label: 'Тел рақам 1', value: `+998 ${formatPhone(tel1)}` });
-    if (tel2) items.push({ label: 'Тел рақам 2', value: `+998 ${formatPhone(tel2)}` });
-    items.push({ label: 'ФИШ', value: fish || '---' });
-    if (lat) items.push({ label: 'Лат (kенглик)', value: lat });
-    if (lng) items.push({ label: 'Лнг (узунлик)', value: lng });
-    items.push({ label: 'Карта рақами', value: card });
-
-    return items;
-  }
-
-  function buildHomeCopyItems() {
-    const kts      = document.getElementById('ktsNumber').value.trim() || '---';
-    const fish     = document.getElementById('homeFish').value.trim() || '---';
-    const tel      = document.getElementById('homeTel').value.trim() || '---';
-    const mfy      = document.getElementById('homeMfy').value.trim() || '---';
-    const street   = document.getElementById('homeStreet').value.trim() || '---';
-    const pultBosh = document.getElementById('homePultBoshligi').value.trim() || '---';
-    const lat      = document.getElementById('homeLat').value;
-    const lng      = document.getElementById('homeLng').value;
-
-    const items = [];
-    items.push({ label: 'КТС рақами', value: kts });
-    items.push({ label: 'ФИШ', value: fish });
-    items.push({ label: 'Тел рақам', value: `+998 ${formatPhone(tel)}` });
-    items.push({ label: 'Манзил', value: `${mfy} МФЙ ${street} кўчаси` });
-    items.push({ label: 'Пулт Бошлиғи', value: `Пулт Бошлиғи: ${pultBosh}` });
-    if (lat) items.push({ label: 'Лат (kенглик)', value: lat });
-    if (lng) items.push({ label: 'Лнг (узунлик)', value: lng });
-
-    return items;
-  }
-
-  function buildLoginCopyItems() {
-    const card = document.getElementById('loginCardNumber').value.trim() || '---';
-    const type = document.getElementById('loginOrgType').value;
-    const name = document.getElementById('loginOrgName').value.trim();
-    const cat  = document.getElementById('loginOrgCategory').value.trim();
-
-    const items = [];
-    items.push({ label: 'Карта рақами', value: card });
-    items.push({ label: 'Ташкилот', value: `${type}"${name}"${cat}` });
-
-    return items;
-  }
-
-  // ── Clipboard nusxalash (fallback bilan) ──
-  async function copyToClipboard(text) {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
-      }
-    } catch (e) { /* fallback pastda */ }
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.focus(); ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      return ok;
-    } catch (e2) { return false; }
-  }
-
-  // ── Natija oynasini ochish ──
-  window.openResult = function(items) {
-    const body = document.getElementById('resultBody');
-    body.innerHTML = '';
-    items.forEach(item => {
-      const row = document.createElement('div');
-      row.className = 'copy-item';
-      row.innerHTML = `
-        <div class="copy-item-text"><span class="copy-item-label">${item.label}</span>${escapeHtml(item.value)}</div>
-        <div class="copy-item-icon">📋</div>
-      `;
-      row.addEventListener('click', async () => {
-        const ok = await copyToClipboard(item.value);
-        if (ok) {
-          row.classList.add('copied');
-          const icon = row.querySelector('.copy-item-icon');
-          icon.textContent = '✅';
-          toast('✅ Нусха олинди');
-          setTimeout(() => {
-            row.classList.remove('copied');
-            icon.textContent = '📋';
-          }, 1400);
-        } else {
-          toast('⚠️ Нусха олиб бўлмади');
-        }
-      });
-      body.appendChild(row);
-    });
-    document.getElementById('resultOverlay').classList.add('open');
-  };
-  window.closeResult = function() {
-    document.getElementById('resultOverlay').classList.remove('open');
-  };
-  document.getElementById('resultOverlay').addEventListener('click', e => {
-    if (e.target === document.getElementById('resultOverlay')) closeResult();
-  });
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
   }
 
 })();
